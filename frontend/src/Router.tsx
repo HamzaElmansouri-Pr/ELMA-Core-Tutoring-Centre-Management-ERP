@@ -16,10 +16,8 @@ import { InvoicesListPage } from './pages/InvoicesListPage';
 import { InvoiceDetailPage } from './pages/InvoiceDetailPage';
 import { PayrollPage } from './pages/PayrollPage';
 import { TimetablePage } from './pages/TimetablePage';
-
-// Placeholder components for dashboard
-const Dashboard = () => <div>Dashboard Content</div>;
-const Settings = () => <div>Settings</div>;
+import { SettingsPage } from './pages/SettingsPage';
+import { DashboardPage } from './pages/DashboardPage';
 
 const LanguageGatekeeper = ({ children }: { children: React.ReactNode }) => {
     const isLangSet = localStorage.getItem('i18nextLng_set');
@@ -54,8 +52,8 @@ export const router = createBrowserRouter([
                 path: '/',
                 element: <AppLayout />,
                 children: [
-                    { index: true, element: <Navigate to="/dashboard" replace /> },
-                    { path: 'dashboard', element: <Dashboard /> },
+                    { index: true, element: <DashboardPage /> },
+                    { path: 'dashboard', element: <DashboardPage /> },
                     { path: 'teachers', element: <TeachersListPage /> },
                     { path: 'subjects', element: <SubjectsListPage /> },
                     { path: 'students', element: <StudentsListPage /> },
@@ -66,7 +64,7 @@ export const router = createBrowserRouter([
                     { path: 'invoices', element: <InvoicesListPage /> },
                     { path: 'invoices/:id', element: <InvoiceDetailPage /> },
                     { path: 'payroll', element: <PayrollPage /> },
-                    { path: 'settings', element: <Settings /> },
+                    { path: 'settings', element: <SettingsPage /> },
                 ]
             }
         ]

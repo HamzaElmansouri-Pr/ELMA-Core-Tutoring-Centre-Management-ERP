@@ -30,4 +30,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('timetable', [\App\Http\Controllers\Api\TimetableController::class, 'index']);
     Route::get('attendance/{class_id}/{session_date}', [\App\Http\Controllers\Api\AttendanceController::class, 'show']);
     Route::post('attendance', [\App\Http\Controllers\Api\AttendanceController::class, 'upsert']);
+
+    Route::get('settings', [\App\Http\Controllers\Api\SettingsController::class, 'index']);
+    Route::post('settings', [\App\Http\Controllers\Api\SettingsController::class, 'store']);
+
+    Route::get('dashboard/kpis', [\App\Http\Controllers\Api\DashboardController::class, 'kpis']);
+    Route::get('dashboard/unpaid-alerts', [\App\Http\Controllers\Api\DashboardController::class, 'unpaidAlerts']);
+    Route::get('dashboard/profit-breakdown', [\App\Http\Controllers\Api\DashboardController::class, 'profitBreakdown']);
 });

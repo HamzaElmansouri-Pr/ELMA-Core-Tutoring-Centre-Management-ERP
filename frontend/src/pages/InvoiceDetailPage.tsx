@@ -6,7 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { formatDH, toCentimes, fromCentimes } from "@/utils/currency";
-import { ArrowLeft, CheckCircle, Undo2 } from "lucide-react";
+import { ArrowLeft, CheckCircle, Undo2, Printer } from "lucide-react";
+import { useRef } from "react";
+import { useReactToPrint } from "react-to-print";
+import { ReceiptTemplate } from "@/components/finance/ReceiptTemplate";
+import { getSettings } from "@/api/settings";
 
 export function InvoiceDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +24,18 @@ export function InvoiceDetailPage() {
   const { data: invoice, isLoading } = useQuery({
     queryKey: ["invoice", id],
     queryFn: () => getInvoiceDetails(Number(id)),
+  });
+
+  const { data: settings } = useQuery({
+    queryKey: ["settings"],
+    queryFn: getSettings,
+  });
+
+  const receiptRef = useRef<HTMLDivElement>(null);
+
+  const handlePrint = useReactToPrint({
+    contentRef: receiptRef,
+    documentTitle: `Receipt_${invoice?.id}`,
   });
 
   const paymentMutation = useMutation({
@@ -86,6 +102,10 @@ export function InvoiceDetailPage() {
               <Undo2 className="w-4 h-4 me-2" /> Issue Refund
             </Button>
           )}
+
+          <Button variant="outline" onClick={() => handlePrint()}>
+            <Printer className="w-4 h-4 me-2" /> Print Receipt
+          </Button>
           
           {invoice.status !== 'paid' && (
             <Button onClick={openPaymentDialog} className="bg-green-600 hover:bg-green-700">
@@ -245,6 +265,11 @@ export function InvoiceDetailPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      {/* Hidden Receipt Template for Printing */}
+      <div className="hidden">
+        <ReceiptTemplate ref={receiptRef} invoice={invoice} settings={settings} />
+      </div>
     </div>
   );
 }
