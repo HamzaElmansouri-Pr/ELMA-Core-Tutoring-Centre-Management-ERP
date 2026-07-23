@@ -11,14 +11,23 @@ const api = axios.create({
 
 export interface Student {
   id: number;
-  name: string;
-  parent_phone: string | null;
+  first_name: string;
+  last_name: string;
+  date_of_birth: string;
+  parent_phone: string;
   active_enrollments_count?: number;
   unpaid_invoices_count?: number;
+  active_enrollments?: any[];
+  ended_enrollments?: any[];
 }
 
 export const getStudents = async (): Promise<Student[]> => {
   const response = await api.get('/students');
+  return response.data.data;
+};
+
+export const getStudent = async (id: number): Promise<Student> => {
+  const response = await api.get(`/students/${id}`);
   return response.data.data;
 };
 

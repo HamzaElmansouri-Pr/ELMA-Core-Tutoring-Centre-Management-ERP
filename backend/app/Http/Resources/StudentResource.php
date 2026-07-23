@@ -16,12 +16,18 @@ class StudentResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
+            'first_name' => $this->first_name,
+            'last_name' => $this->last_name,
+            'date_of_birth' => $this->date_of_birth,
             'parent_phone' => $this->parent_phone,
-            'active_enrollments_count' => $this->whenCounted('activeEnrollments'),
-            'unpaid_invoices_count' => $this->whenCounted('unpaidInvoices'),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'active_enrollments' => $this->whenLoaded('enrollments', function () {
+                return $this->enrollments->where('status', 'active')->values();
+            }),
+            'ended_enrollments' => $this->whenLoaded('enrollments', function () {
+                return $this->enrollments->where('status', 'ended')->values();
+            }),
         ];
     }
 }

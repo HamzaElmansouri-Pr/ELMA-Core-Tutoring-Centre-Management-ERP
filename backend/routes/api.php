@@ -12,4 +12,10 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::apiResource('teachers', \App\Http\Controllers\TeacherController::class);
     Route::apiResource('students', \App\Http\Controllers\StudentController::class);
+    Route::apiResource('subjects', \App\Http\Controllers\Api\SubjectController::class);
+    Route::apiResource('school-classes', \App\Http\Controllers\Api\SchoolClassController::class);
+    
+    Route::post('enrollments', [\App\Http\Controllers\Api\EnrollmentController::class, 'store']);
+    Route::post('enrollments/{enrollment}/end', [\App\Http\Controllers\Api\EnrollmentController::class, 'end']);
+    Route::delete('enrollments/{enrollment}', [\App\Http\Controllers\Api\EnrollmentController::class, 'destroy']);
 });

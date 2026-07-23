@@ -31,7 +31,7 @@ class StudentController extends Controller
      */
     public function show(Student $student)
     {
-        return new StudentResource($student->loadCount(['activeEnrollments', 'unpaidInvoices']));
+        return new StudentResource($student->load('enrollments.schoolClass.subject', 'enrollments.schoolClass.teacher')->loadCount(['activeEnrollments', 'unpaidInvoices']));
     }
 
     /**
