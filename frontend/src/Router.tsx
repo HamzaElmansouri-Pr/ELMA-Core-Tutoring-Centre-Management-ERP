@@ -15,6 +15,7 @@ import { BillingCenterPage } from './pages/BillingCenterPage';
 import { InvoicesListPage } from './pages/InvoicesListPage';
 import { InvoiceDetailPage } from './pages/InvoiceDetailPage';
 import { PayrollPage } from './pages/PayrollPage';
+import { TimetablePage } from './pages/TimetablePage';
 
 // Placeholder components for dashboard
 const Dashboard = () => <div>Dashboard Content</div>;
@@ -60,6 +61,7 @@ export const router = createBrowserRouter([
                     { path: 'students', element: <StudentsListPage /> },
                     { path: 'students/:id', element: <StudentDetailPage /> },
                     { path: 'classes', element: <ClassesListPage /> },
+                    { path: 'timetable', element: <TimetablePage /> },
                     { path: 'finance', element: <BillingCenterPage /> },
                     { path: 'invoices', element: <InvoicesListPage /> },
                     { path: 'invoices/:id', element: <InvoiceDetailPage /> },

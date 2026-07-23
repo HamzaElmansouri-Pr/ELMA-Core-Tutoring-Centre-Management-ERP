@@ -26,4 +26,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('payroll', [\App\Http\Controllers\Api\PayrollController::class, 'index']);
     Route::post('payroll/calculate', [\App\Http\Controllers\Api\PayrollController::class, 'calculate']);
     Route::post('payroll/{record}/mark-paid', [\App\Http\Controllers\Api\PayrollController::class, 'markPaid']);
+
+    Route::get('timetable', [\App\Http\Controllers\Api\TimetableController::class, 'index']);
+    Route::get('attendance/{class_id}/{session_date}', [\App\Http\Controllers\Api\AttendanceController::class, 'show']);
+    Route::post('attendance', [\App\Http\Controllers\Api\AttendanceController::class, 'upsert']);
 });
