@@ -14,6 +14,7 @@ import { ClassesListPage } from './pages/ClassesListPage';
 import { BillingCenterPage } from './pages/BillingCenterPage';
 import { InvoicesListPage } from './pages/InvoicesListPage';
 import { InvoiceDetailPage } from './pages/InvoiceDetailPage';
+import { PayrollPage } from './pages/PayrollPage';
 
 // Placeholder components for dashboard
 const Dashboard = () => <div>Dashboard Content</div>;
@@ -62,6 +63,7 @@ export const router = createBrowserRouter([
                     { path: 'finance', element: <BillingCenterPage /> },
                     { path: 'invoices', element: <InvoicesListPage /> },
                     { path: 'invoices/:id', element: <InvoiceDetailPage /> },
+                    { path: 'payroll', element: <PayrollPage /> },
                     { path: 'settings', element: <Settings /> },
                 ]
             }

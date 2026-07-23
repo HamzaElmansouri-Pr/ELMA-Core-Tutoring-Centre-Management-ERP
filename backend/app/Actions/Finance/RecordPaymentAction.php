@@ -4,6 +4,7 @@ namespace App\Actions\Finance;
 
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Models\PaymentAllocation;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
@@ -65,6 +66,14 @@ class RecordPaymentAction
 
                     $item->paid_amount_centimes += $allocation;
                     $item->save();
+
+                    if ($allocation > 0) {
+                        PaymentAllocation::create([
+                            'payment_id' => $payment->id,
+                            'invoice_item_id' => $item->id,
+                            'amount_centimes' => $allocation,
+                        ]);
+                    }
                 }
             }
 

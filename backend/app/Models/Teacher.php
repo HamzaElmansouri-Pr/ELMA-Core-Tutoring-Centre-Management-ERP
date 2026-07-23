@@ -26,4 +26,9 @@ class Teacher extends Model
         return LogOptions::defaults()
             ->logFillable();
     }
+
+    public function payrollRecords()
+    {
+        return $this->hasMany(PayrollRecord::class);
+    }
 }

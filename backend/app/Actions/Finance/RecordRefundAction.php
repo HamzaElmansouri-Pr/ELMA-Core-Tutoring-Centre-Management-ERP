@@ -4,6 +4,7 @@ namespace App\Actions\Finance;
 
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Models\PaymentAllocation;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
@@ -60,9 +61,18 @@ class RecordRefundAction
                     $item->paid_amount_centimes -= $deallocation;
                     // Failsafe bounds check
                     if ($item->paid_amount_centimes < 0) {
+                        $deallocation += $item->paid_amount_centimes;
                         $item->paid_amount_centimes = 0;
                     }
                     $item->save();
+
+                    if ($deallocation > 0) {
+                        PaymentAllocation::create([
+                            'payment_id' => $refund->id,
+                            'invoice_item_id' => $item->id,
+                            'amount_centimes' => -$deallocation,
+                        ]);
+                    }
                 }
             }
 
