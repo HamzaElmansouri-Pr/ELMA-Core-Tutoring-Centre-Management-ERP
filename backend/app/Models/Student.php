@@ -22,15 +22,25 @@ class Student extends Model
             ->logFillable();
     }
 
+    public function enrollments()
+    {
+        return $this->hasMany(Enrollment::class);
+    }
+
     public function activeEnrollments()
     {
-        // Placeholder for future relationship
-        return $this->hasMany(Student::class, 'id', 'id')->whereRaw('1=0');
+        return $this->hasMany(Enrollment::class)->where('status', 'active');
+    }
+
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
     }
 
     public function unpaidInvoices()
     {
-        // Placeholder for future relationship
-        return $this->hasMany(Student::class, 'id', 'id')->whereRaw('1=0');
+        return $this->hasMany(Invoice::class)->whereIn('status', ['unpaid', 'partial']);
     }
+
+
 }

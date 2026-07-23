@@ -18,4 +18,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('enrollments', [\App\Http\Controllers\Api\EnrollmentController::class, 'store']);
     Route::post('enrollments/{enrollment}/end', [\App\Http\Controllers\Api\EnrollmentController::class, 'end']);
     Route::delete('enrollments/{enrollment}', [\App\Http\Controllers\Api\EnrollmentController::class, 'destroy']);
+
+    Route::post('invoices/generate', [\App\Http\Controllers\Api\InvoiceController::class, 'generate']);
+    Route::apiResource('invoices', \App\Http\Controllers\Api\InvoiceController::class)->only(['index', 'show']);
+    Route::post('invoices/{invoice}/payments', [\App\Http\Controllers\Api\PaymentController::class, 'store']);
 });

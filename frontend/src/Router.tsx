@@ -8,10 +8,15 @@ import { TeachersListPage } from './pages/TeachersListPage';
 import { StudentsListPage } from './pages/StudentsListPage';
 import { StudentDetailPage } from './pages/StudentDetailPage';
 
+import { SubjectsListPage } from './pages/SubjectsListPage';
+import { ClassesListPage } from './pages/ClassesListPage';
+
+import { BillingCenterPage } from './pages/BillingCenterPage';
+import { InvoicesListPage } from './pages/InvoicesListPage';
+import { InvoiceDetailPage } from './pages/InvoiceDetailPage';
+
 // Placeholder components for dashboard
 const Dashboard = () => <div>Dashboard Content</div>;
-const Classes = () => <div>Classes Management</div>;
-const Finance = () => <div>Finance</div>;
 const Settings = () => <div>Settings</div>;
 
 const LanguageGatekeeper = ({ children }: { children: React.ReactNode }) => {
@@ -50,10 +55,13 @@ export const router = createBrowserRouter([
                     { index: true, element: <Navigate to="/dashboard" replace /> },
                     { path: 'dashboard', element: <Dashboard /> },
                     { path: 'teachers', element: <TeachersListPage /> },
+                    { path: 'subjects', element: <SubjectsListPage /> },
                     { path: 'students', element: <StudentsListPage /> },
                     { path: 'students/:id', element: <StudentDetailPage /> },
-                    { path: 'classes', element: <Classes /> },
-                    { path: 'finance', element: <Finance /> },
+                    { path: 'classes', element: <ClassesListPage /> },
+                    { path: 'finance', element: <BillingCenterPage /> },
+                    { path: 'invoices', element: <InvoicesListPage /> },
+                    { path: 'invoices/:id', element: <InvoiceDetailPage /> },
                     { path: 'settings', element: <Settings /> },
                 ]
             }
