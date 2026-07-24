@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,6 +16,8 @@ import { Input } from "@/components/ui/input";
 const teacherSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email").or(z.literal("")).transform(e => e === "" ? null : e).nullable(),
+  phone: z.string().or(z.literal("")).transform(e => e === "" ? null : e).nullable(),
+  whatsapp_phone: z.string().or(z.literal("")).transform(e => e === "" ? null : e).nullable(),
   commission_percentage: z.number().min(0).max(100),
   is_active: z.boolean(),
 });
@@ -35,20 +38,33 @@ export function TeacherFormDialog({
   onSuccess,
 }: TeacherFormDialogProps) {
   const { t } = useTranslation("common");
+  const [sameAsPhone, setSameAsPhone] = useState(false);
 
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<TeacherFormValues>({
     resolver: zodResolver(teacherSchema),
     defaultValues: {
       name: teacher?.name || "",
       email: teacher?.email || "",
+      phone: teacher?.phone || "",
+      whatsapp_phone: teacher?.whatsapp_phone || "",
       commission_percentage: teacher?.commission_percentage || 0,
       is_active: teacher?.is_active ?? true,
     },
   });
+
+  const phoneValue = watch("phone");
+
+  useEffect(() => {
+    if (sameAsPhone && phoneValue !== undefined) {
+      setValue("whatsapp_phone", phoneValue, { shouldValidate: true });
+    }
+  }, [sameAsPhone, phoneValue, setValue]);
 
   const onSubmit = async (data: TeacherFormValues) => {
     try {
@@ -90,6 +106,37 @@ export function TeacherFormDialog({
             )}
           </div>
 
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Phone Number</label>
+              <Input type="tel" {...register("phone")} />
+              {errors.phone && (
+                <span className="text-sm text-red-500">{errors.phone.message}</span>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">WhatsApp Number</label>
+              <Input type="tel" {...register("whatsapp_phone")} disabled={sameAsPhone} />
+              {errors.whatsapp_phone && (
+                <span className="text-sm text-red-500">{errors.whatsapp_phone.message}</span>
+              )}
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <input 
+              type="checkbox" 
+              id="sameAsPhone" 
+              checked={sameAsPhone} 
+              onChange={(e) => setSameAsPhone(e.target.checked)} 
+              className="w-4 h-4 rounded border-gray-300"
+            />
+            <label htmlFor="sameAsPhone" className="text-sm text-gray-600">
+              Same as phone number
+            </label>
+          </div>
+
           <div>
             <label className="block text-sm font-medium mb-1">
               {t("commission")}
@@ -107,7 +154,7 @@ export function TeacherFormDialog({
           </div>
 
           <div className="flex items-center gap-2">
-            <input type="checkbox" id="is_active" {...register("is_active")} />
+            <input type="checkbox" id="is_active" {...register("is_active")} className="w-4 h-4 rounded border-gray-300" />
             <label htmlFor="is_active" className="text-sm font-medium">
               {t("active")}
             </label>

@@ -25,6 +25,8 @@ class StoreTeacherRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'unique:teachers,email'],
+            'phone' => ['nullable', 'string', 'max:255'],
+            'whatsapp_phone' => ['nullable', 'string', 'max:255'],
             'commission_percentage' => ['required', 'numeric', 'min:0', 'max:100'],
             'is_active' => ['boolean'],
         ];

@@ -10,11 +10,19 @@ use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 
-#[Fillable(['name', 'email', 'commission_percentage', 'is_active'])]
 class Teacher extends Model
 {
     /** @use HasFactory<\Database\Factories\TeacherFactory> */
     use HasFactory, SoftDeletes, LogsActivity;
+
+    protected $fillable = [
+        'name',
+        'email',
+        'phone',
+        'whatsapp_phone',
+        'commission_percentage',
+        'is_active',
+    ];
 
     protected $casts = [
         'is_active' => 'boolean',

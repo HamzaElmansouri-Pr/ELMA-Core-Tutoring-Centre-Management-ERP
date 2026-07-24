@@ -25,6 +25,8 @@ class UpdateTeacherRequest extends FormRequest
         return [
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'unique:teachers,email,' . $this->teacher->id],
+            'phone' => ['nullable', 'string', 'max:255'],
+            'whatsapp_phone' => ['nullable', 'string', 'max:255'],
             'commission_percentage' => ['sometimes', 'required', 'numeric', 'min:0', 'max:100'],
             'is_active' => ['boolean'],
         ];

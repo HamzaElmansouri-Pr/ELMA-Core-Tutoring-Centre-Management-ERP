@@ -4,6 +4,8 @@ export interface Teacher {
   id: number;
   name: string;
   email: string | null;
+  phone?: string | null;
+  whatsapp_phone?: string | null;
   commission_percentage: number;
   is_active: boolean;
 }

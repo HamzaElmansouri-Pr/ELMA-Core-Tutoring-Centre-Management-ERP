@@ -47,4 +47,9 @@ class Student extends Model
     {
         return $this->hasMany(Invoice::class);
     }
+
+    public function unpaidInvoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class)->where('status', 'unpaid');
+    }
 }
