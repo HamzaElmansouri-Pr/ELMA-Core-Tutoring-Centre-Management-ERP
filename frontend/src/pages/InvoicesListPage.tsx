@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { getInvoices } from "@/api/finance";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -7,6 +8,7 @@ import { formatDH } from "@/utils/currency";
 import { ArrowLeft, FileText } from "lucide-react";
 
 export function InvoicesListPage() {
+  const { t } = useTranslation("common");
   const { data, isLoading } = useQuery({
     queryKey: ["invoices"],
     queryFn: () => getInvoices(),
@@ -20,7 +22,7 @@ export function InvoicesListPage() {
         <Button variant="ghost" size="icon" asChild>
           <Link to="/finance"><ArrowLeft className="w-5 h-5" /></Link>
         </Button>
-        <h1 className="text-2xl font-semibold">All Invoices</h1>
+        <h1 className="text-2xl font-semibold">{t("sidebar_invoices", "Invoices")}</h1>
       </div>
 
       <div className="bg-white p-6 border rounded-md shadow-sm dark:bg-slate-900">
@@ -63,7 +65,7 @@ export function InvoicesListPage() {
                   <TableCell>
                     <Button variant="outline" size="sm" asChild>
                       <Link to={`/invoices/${inv.id}`}>
-                        <FileText className="w-4 h-4 me-2" /> View
+                         <FileText className="w-4 h-4 me-2" /> {t("view")}
                       </Link>
                     </Button>
                   </TableCell>
@@ -71,7 +73,15 @@ export function InvoicesListPage() {
               ))}
               {invoices.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-4">No invoices found.</TableCell>
+                  <TableCell colSpan={8} className="h-48 text-center">
+                    <div className="flex flex-col items-center justify-center text-gray-500">
+                      <svg className="w-12 h-12 mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <p className="text-lg font-medium">{t("no_data_found")}</p>
+                      <p className="text-sm mt-1">{t("no_invoices_yet")}</p>
+                    </div>
+                  </TableCell>
                 </TableRow>
               )}
             </TableBody>

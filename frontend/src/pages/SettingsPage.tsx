@@ -121,6 +121,16 @@ export function SettingsPage() {
           {updateMutation.isPending ? t('saving', 'Saving...') : t('save_settings', 'Save Settings')}
         </Button>
       </div>
+
+      <div className="bg-white p-6 border rounded-md shadow-sm dark:bg-slate-900 space-y-4">
+        <h2 className="text-lg font-semibold">{t('download_backup', 'Download Database Backup')}</h2>
+        <p className="text-sm text-gray-500">{t('backup_description', 'Download a copy of your entire database for safekeeping.')}</p>
+        <Button variant="outline" asChild>
+          <a href="http://localhost:8000/api/backup/export" download>
+            {t('download_backup', 'Download Database Backup')}
+          </a>
+        </Button>
+      </div>
     </div>
   );
 }

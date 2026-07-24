@@ -7,8 +7,8 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { getStudents, type Student, deleteStudent } from "@/api/students";
-import { StudentFormDialog } from "@/components/students/StudentFormDialog";
+import { getClasses, type SchoolClass, deleteClass } from "@/api/classes";
+import { ClassFormDialog } from "@/components/classes/ClassFormDialog";
 import { Button } from "@/components/ui/button";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import {
@@ -19,58 +19,54 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Link } from "react-router-dom";
 
-const columnHelper = createColumnHelper<Student>();
+const columnHelper = createColumnHelper<SchoolClass>();
 
-export function StudentsListPage() {
+export function ClassesListPage() {
   const { t } = useTranslation("common");
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [selectedClass, setSelectedClass] = useState<SchoolClass | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const { data: students = [], refetch, isLoading } = useQuery({
-    queryKey: ["students"],
-    queryFn: getStudents,
+  const { data: classes = [], refetch, isLoading } = useQuery({
+    queryKey: ["classes"],
+    queryFn: getClasses,
   });
 
-  const handleEdit = (student: Student) => {
-    setSelectedStudent(student);
+  const handleEdit = (schoolClass: SchoolClass) => {
+    setSelectedClass(schoolClass);
     setIsDialogOpen(true);
   };
 
   const handleDelete = async (id: number) => {
-    if (confirm(t("delete_student") + "?")) {
-      await deleteStudent(id);
+    if (confirm(t("delete_class", "Delete Class") + "?")) {
+      await deleteClass(id);
       refetch();
     }
   };
 
   const handleAdd = () => {
-    setSelectedStudent(null);
+    setSelectedClass(null);
     setIsDialogOpen(true);
   };
 
   const columns = [
-    columnHelper.accessor((row) => `${row.first_name} ${row.last_name}`, {
-      id: "name",
+    columnHelper.accessor("name", {
       header: t("name"),
-      cell: (info) => (
-        <Link to={`/students/${info.row.original.id}`} className="text-blue-600 hover:underline">
-          {info.getValue()}
-        </Link>
-      ),
+      cell: (info) => info.getValue(),
     }),
-    columnHelper.accessor("parent_phone", {
-      header: t("parent_phone"),
+    columnHelper.accessor("subject.name", {
+      id: "subject",
+      header: t("sidebar_subjects", "Subjects"),
       cell: (info) => info.getValue() || "-",
     }),
-    columnHelper.accessor("active_enrollments_count", {
-      header: t("active_enrollments"),
-      cell: (info) => info.getValue() || 0,
+    columnHelper.accessor("teacher.name", {
+      id: "teacher",
+      header: t("sidebar_teachers", "Teachers"),
+      cell: (info) => info.getValue() || "-",
     }),
-    columnHelper.accessor("unpaid_invoices_count", {
-      header: t("unpaid_invoices"),
-      cell: (info) => info.getValue() || 0,
+    columnHelper.accessor("enrollments_count", {
+      header: t("students", "Students"),
+      cell: (info) => info.getValue() ?? 0,
     }),
     columnHelper.display({
       id: "actions",
@@ -89,7 +85,7 @@ export function StudentsListPage() {
   ];
 
   const table = useReactTable({
-    data: students,
+    data: classes,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
@@ -97,10 +93,10 @@ export function StudentsListPage() {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">{t("sidebar_students", "Students")}</h1>
+        <h1 className="text-2xl font-semibold">{t("sidebar_classes", "Classes")}</h1>
         <Button onClick={handleAdd}>
           <Plus className="w-4 h-4 me-2" />
-          {t("add_student")}
+          {t("add_class", "Add Class")}
         </Button>
       </div>
 
@@ -144,10 +140,10 @@ export function StudentsListPage() {
                 <TableCell colSpan={columns.length} className="h-48 text-center">
                   <div className="flex flex-col items-center justify-center text-gray-500">
                     <svg className="w-12 h-12 mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
                     <p className="text-lg font-medium">{t("no_data_found")}</p>
-                    <p className="text-sm mt-1">{t("no_students_yet")}</p>
+                    <p className="text-sm mt-1">{t("no_classes_yet")}</p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -157,8 +153,8 @@ export function StudentsListPage() {
       </div>
 
       {isDialogOpen && (
-        <StudentFormDialog
-          student={selectedStudent}
+        <ClassFormDialog
+          schoolClass={selectedClass}
           isOpen={isDialogOpen}
           onClose={() => setIsDialogOpen(false)}
           onSuccess={() => {

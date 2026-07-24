@@ -17,8 +17,10 @@ const AppLayout: React.FC = () => {
         </div>
         <nav className="flex-1 p-4 space-y-2">
           <Link to="/dashboard" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">{t('dashboard')}</Link>
-          <Link to="/students" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">Students</Link>
-          <Link to="/classes" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">Classes</Link>
+          <Link to="/teachers" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">{t('sidebar_teachers', 'Teachers')}</Link>
+          <Link to="/students" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">{t('sidebar_students', 'Students')}</Link>
+          <Link to="/subjects" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">{t('sidebar_subjects', 'Subjects')}</Link>
+          <Link to="/classes" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">{t('sidebar_classes', 'Classes')}</Link>
           <Link to="/finance" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">Finance</Link>
           <Link to="/settings" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">Settings</Link>
         </nav>
