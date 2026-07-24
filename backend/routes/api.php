@@ -37,4 +37,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('dashboard/kpis', [\App\Http\Controllers\Api\DashboardController::class, 'kpis']);
     Route::get('dashboard/unpaid-alerts', [\App\Http\Controllers\Api\DashboardController::class, 'unpaidAlerts']);
     Route::get('dashboard/profit-breakdown', [\App\Http\Controllers\Api\DashboardController::class, 'profitBreakdown']);
+
+    Route::get('backup/export', [\App\Http\Controllers\Api\BackupController::class, 'export']);
 });

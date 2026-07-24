@@ -12,12 +12,14 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
+use Laravel\Sanctum\HasApiTokens;
+
 #[Fillable(['name', 'email', 'password', 'preferred_locale'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, LogsActivity;
+    use HasApiTokens, HasFactory, Notifiable, LogsActivity;
 
     public function getActivitylogOptions(): LogOptions
     {

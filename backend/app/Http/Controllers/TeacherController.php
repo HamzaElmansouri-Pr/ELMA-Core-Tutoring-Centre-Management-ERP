@@ -48,6 +48,16 @@ class TeacherController extends Controller
      */
     public function destroy(Teacher $teacher)
     {
+        $activeClassCount = \App\Models\SchoolClass::where('teacher_id', $teacher->id)
+            ->where('is_active', true)
+            ->count();
+
+        if ($activeClassCount > 0) {
+            return response()->json([
+                'message' => 'Cannot delete teacher. Please reassign their active classes first.',
+            ], 422);
+        }
+
         $teacher->delete();
         return response()->noContent();
     }

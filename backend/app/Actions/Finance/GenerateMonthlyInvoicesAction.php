@@ -13,6 +13,9 @@ class GenerateMonthlyInvoicesAction
 {
     public function execute(int $month, int $year): array
     {
+        // Auto-backup database before generating invoices
+        $this->backupDatabase();
+
         $targetDate = Carbon::create($year, $month, 1)->startOfMonth();
         $nextMonth = now()->addMonth()->startOfMonth();
 
@@ -83,5 +86,22 @@ class GenerateMonthlyInvoicesAction
         return [
             'generated' => $generatedCount,
         ];
+    }
+
+    private function backupDatabase(): void
+    {
+        $dbPath = database_path('database.sqlite');
+
+        if (!file_exists($dbPath)) {
+            return;
+        }
+
+        $backupDir = storage_path('app/backups');
+        if (!is_dir($backupDir)) {
+            mkdir($backupDir, 0755, true);
+        }
+
+        $timestamp = now()->format('Y-m-d_H-i-s');
+        copy($dbPath, $backupDir . "/elma-backup-{$timestamp}.sqlite");
     }
 }

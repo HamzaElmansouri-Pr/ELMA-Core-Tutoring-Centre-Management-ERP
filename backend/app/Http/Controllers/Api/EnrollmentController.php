@@ -42,11 +42,9 @@ class EnrollmentController extends Controller
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function end(Enrollment $enrollment, EndEnrollmentAction $action)
     {
-        //
+        $enrollment = $action->execute($enrollment);
+        return response()->json($enrollment);
     }
 }
