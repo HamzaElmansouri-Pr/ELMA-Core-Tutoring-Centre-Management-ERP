@@ -2,45 +2,49 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 
-#[Fillable(['name', 'parent_phone'])]
 class Student extends Model
 {
-    /** @use HasFactory<\Database\Factories\StudentFactory> */
     use HasFactory, SoftDeletes, LogsActivity;
+
+    protected $fillable = [
+        'first_name',
+        'last_name',
+        'parent_phone',
+    ];
+
+    protected $appends = ['name'];
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logFillable();
+            ->logFillable()
+            ->logOnlyDirty();
     }
 
-    public function enrollments()
+    public function getNameAttribute(): string
+    {
+        return "{$this->first_name} {$this->last_name}";
+    }
+
+    public function enrollments(): HasMany
     {
         return $this->hasMany(Enrollment::class);
     }
 
-    public function activeEnrollments()
+    public function activeEnrollments(): HasMany
     {
         return $this->hasMany(Enrollment::class)->where('status', 'active');
     }
 
-    public function invoices()
+    public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
     }
-
-    public function unpaidInvoices()
-    {
-        return $this->hasMany(Invoice::class)->whereIn('status', ['unpaid', 'partial']);
-    }
-
-
 }

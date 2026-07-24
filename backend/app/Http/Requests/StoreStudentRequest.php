@@ -15,15 +15,22 @@ class StoreStudentRequest extends FormRequest
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
+    protected function prepareForValidation()
+    {
+        if ($this->has('name')) {
+            $parts = explode(' ', $this->name, 2);
+            $this->merge([
+                'first_name' => $parts[0] ?? '',
+                'last_name' => $parts[1] ?? 'Doe', // fallback if no last name
+            ]);
+        }
+    }
+
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
             'parent_phone' => ['nullable', 'string', 'max:20'],
         ];
     }

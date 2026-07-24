@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('student_id')->constrained('students');
             $table->foreignId('school_class_id')->constrained('school_classes');
-            $table->string('status')->default('active'); // active, ended
+            $table->string('status')->default('active');
+            $table->decimal('custom_price_override', 10, 2)->nullable(); // active, ended
             $table->date('start_date');
             $table->date('end_date')->nullable();
             $table->timestamps();
