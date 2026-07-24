@@ -35,3 +35,15 @@ export const updateStudent = async (id: number, data: Partial<Student>): Promise
 export const deleteStudent = async (id: number): Promise<void> => {
   await api.delete(`/api/students/${id}`);
 };
+
+export const searchStudents = async (query: string): Promise<Student[]> => {
+  const response = await api.get(`/api/students/search?q=${encodeURIComponent(query)}`);
+  return response.data.data;
+};
+
+export const bulkEnrollStudent = async (studentId: number, classIds: number[], startDate?: string) => {
+  const payload: any = { class_ids: classIds };
+  if (startDate) payload.start_date = startDate;
+  const response = await api.post(`/api/students/${studentId}/bulk-enroll`, payload);
+  return response.data;
+};

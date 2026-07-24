@@ -6,9 +6,46 @@ use App\Models\Student;
 use App\Http\Resources\StudentResource;
 use App\Http\Requests\StoreStudentRequest;
 use App\Http\Requests\UpdateStudentRequest;
+use App\Actions\BulkEnrollmentAction;
+use Illuminate\Http\Request;
 
 class StudentController extends Controller
 {
+    /**
+     * Search for students by first_name, last_name, or parent_phone
+     */
+    public function search(Request $request)
+    {
+        $query = $request->input('q', '');
+        
+        if (empty($query)) {
+            return response()->json([]);
+        }
+
+        $students = Student::where('first_name', 'like', "%{$query}%")
+            ->orWhere('last_name', 'like', "%{$query}%")
+            ->orWhere('parent_phone', 'like', "%{$query}%")
+            ->limit(10)
+            ->get();
+
+        return StudentResource::collection($students);
+    }
+
+    /**
+     * Bulk enroll a student into multiple classes
+     */
+    public function bulkEnroll(Request $request, Student $student, BulkEnrollmentAction $action)
+    {
+        $validated = $request->validate([
+            'class_ids' => ['required', 'array'],
+            'class_ids.*' => ['integer', 'exists:school_classes,id'],
+            'start_date' => ['nullable', 'date'],
+        ]);
+
+        $result = $action->execute($student, $validated['class_ids'], $validated['start_date'] ?? null);
+
+        return response()->json($result);
+    }
     /**
      * Display a listing of the resource.
      */

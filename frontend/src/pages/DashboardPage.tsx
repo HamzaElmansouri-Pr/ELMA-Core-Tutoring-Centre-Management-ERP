@@ -77,7 +77,7 @@ export function DashboardPage() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis tickFormatter={(val) => `${val / 100} DH`} />
-                    <Tooltip formatter={(value: number) => formatDH(value)} />
+                    <Tooltip formatter={(value: any) => new Intl.NumberFormat(undefined, { style: 'currency', currency: 'DZD' }).format(value)} />
                     <Legend />
                     {Object.keys(breakdown[0] || {}).filter(k => k !== 'name').map((subject, idx) => (
                       <Line 

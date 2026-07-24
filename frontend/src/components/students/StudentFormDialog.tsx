@@ -41,7 +41,7 @@ export function StudentFormDialog({
   } = useForm<StudentFormValues>({
     resolver: zodResolver(studentSchema),
     defaultValues: {
-      name: student?.name || "",
+      name: student ? `${student.first_name} ${student.last_name}` : "",
       parent_phone: student?.parent_phone || "",
     },
   });

@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-table";
 import { getStudents, type Student, deleteStudent } from "@/api/students";
 import { StudentFormDialog } from "@/components/students/StudentFormDialog";
+import { SmartEnrollmentWizard } from "@/components/students/SmartEnrollmentWizard";
 import { Button } from "@/components/ui/button";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import {
@@ -26,7 +27,8 @@ const columnHelper = createColumnHelper<Student>();
 export function StudentsListPage() {
   const { t } = useTranslation("common");
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
 
   const { data: students = [], refetch, isLoading } = useQuery({
     queryKey: ["students"],
@@ -35,7 +37,7 @@ export function StudentsListPage() {
 
   const handleEdit = (student: Student) => {
     setSelectedStudent(student);
-    setIsDialogOpen(true);
+    setIsEditDialogOpen(true);
   };
 
   const handleDelete = async (id: number) => {
@@ -46,8 +48,7 @@ export function StudentsListPage() {
   };
 
   const handleAdd = () => {
-    setSelectedStudent(null);
-    setIsDialogOpen(true);
+    setIsWizardOpen(true);
   };
 
   const columns = [
@@ -156,13 +157,24 @@ export function StudentsListPage() {
         </Table>
       </div>
 
-      {isDialogOpen && (
+      {isEditDialogOpen && (
         <StudentFormDialog
           student={selectedStudent}
-          isOpen={isDialogOpen}
-          onClose={() => setIsDialogOpen(false)}
+          isOpen={isEditDialogOpen}
+          onClose={() => setIsEditDialogOpen(false)}
           onSuccess={() => {
-            setIsDialogOpen(false);
+            setIsEditDialogOpen(false);
+            refetch();
+          }}
+        />
+      )}
+
+      {isWizardOpen && (
+        <SmartEnrollmentWizard
+          isOpen={isWizardOpen}
+          onClose={() => setIsWizardOpen(false)}
+          onSuccess={() => {
+            setIsWizardOpen(false);
             refetch();
           }}
         />

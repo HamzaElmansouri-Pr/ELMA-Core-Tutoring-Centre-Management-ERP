@@ -1,4 +1,6 @@
 import api from '@/lib/axios';
+import { type Subject } from './subjects';
+import { type Teacher } from './teachers';
 
 export interface ScheduleItem {
   day: string;

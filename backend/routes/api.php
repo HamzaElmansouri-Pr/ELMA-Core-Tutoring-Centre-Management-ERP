@@ -11,6 +11,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     
     Route::apiResource('teachers', \App\Http\Controllers\TeacherController::class);
+    Route::get('students/search', [\App\Http\Controllers\StudentController::class, 'search']);
+    Route::post('students/{student}/bulk-enroll', [\App\Http\Controllers\StudentController::class, 'bulkEnroll']);
     Route::apiResource('students', \App\Http\Controllers\StudentController::class);
     Route::apiResource('subjects', \App\Http\Controllers\Api\SubjectController::class);
     Route::apiResource('school-classes', \App\Http\Controllers\Api\SchoolClassController::class);
