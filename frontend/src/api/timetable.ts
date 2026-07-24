@@ -1,13 +1,4 @@
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
-  withCredentials: true,
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json',
-  },
-});
+import api from '@/lib/axios';
 
 export interface TimetableBlock {
   class_id: number;
@@ -26,16 +17,16 @@ export interface AttendanceRecordDTO {
 }
 
 export const getTimetable = async (): Promise<TimetableBlock[]> => {
-  const response = await api.get('/timetable');
+  const response = await api.get('/api/timetable');
   return response.data.data;
 };
 
 export const getAttendance = async (class_id: number, session_date: string): Promise<AttendanceRecordDTO[]> => {
-  const response = await api.get(`/attendance/${class_id}/${session_date}`);
+  const response = await api.get(`/api/attendance/${class_id}/${session_date}`);
   return response.data.data;
 };
 
 export const saveAttendance = async (payload: { class_id: number; session_date: string; records: { enrollment_id: number; status: string }[] }) => {
-  const response = await api.post('/attendance', payload);
+  const response = await api.post('/api/attendance', payload);
   return response.data;
 };

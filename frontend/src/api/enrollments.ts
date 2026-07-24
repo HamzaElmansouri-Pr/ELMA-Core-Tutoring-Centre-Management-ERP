@@ -1,14 +1,4 @@
-import axios from 'axios';
-import type { SchoolClass } from './classes';
-
-const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
-  withCredentials: true,
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json',
-  },
-});
+import api from '@/lib/axios';
 
 export interface Enrollment {
   id: number;
@@ -21,7 +11,7 @@ export interface Enrollment {
 }
 
 export const enrollStudent = async (studentId: number, classId: number, startDate?: string): Promise<Enrollment> => {
-  const response = await api.post('/enrollments', {
+  const response = await api.post('/api/enrollments', {
     student_id: studentId,
     school_class_id: classId,
     start_date: startDate,
@@ -30,12 +20,12 @@ export const enrollStudent = async (studentId: number, classId: number, startDat
 };
 
 export const endEnrollment = async (enrollmentId: number, endDate?: string): Promise<Enrollment> => {
-  const response = await api.post(`/enrollments/${enrollmentId}/end`, {
+  const response = await api.post(`/api/enrollments/${enrollmentId}/end`, {
     end_date: endDate,
   });
   return response.data.data;
 };
 
 export const deleteEnrollment = async (enrollmentId: number): Promise<void> => {
-  await api.delete(`/enrollments/${enrollmentId}`);
+  await api.delete(`/api/enrollments/${enrollmentId}`);
 };

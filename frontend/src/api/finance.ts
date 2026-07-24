@@ -1,13 +1,4 @@
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
-  withCredentials: true,
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json',
-  },
-});
+import api from '@/lib/axios';
 
 export interface InvoiceItem {
   id: number;
@@ -42,22 +33,22 @@ export interface Invoice {
 }
 
 export const generateInvoices = async (month: number, year: number): Promise<{ message: string; generated: number }> => {
-  const response = await api.post('/invoices/generate', { month, year });
+  const response = await api.post('/api/invoices/generate', { month, year });
   return response.data;
 };
 
 export const getInvoices = async (params?: { status?: string; month?: number; year?: number; page?: number }): Promise<{ data: Invoice[]; meta: any }> => {
-  const response = await api.get('/invoices', { params });
+  const response = await api.get('/api/invoices', { params });
   return response.data;
 };
 
 export const getInvoiceDetails = async (id: number): Promise<Invoice> => {
-  const response = await api.get(`/invoices/${id}`);
+  const response = await api.get(`/api/invoices/${id}`);
   return response.data.data;
 };
 
 export const recordPayment = async (invoiceId: number, amount_centimes: number, type: 'payment' | 'refund', payment_method?: string, reason?: string): Promise<Payment> => {
-  const response = await api.post(`/invoices/${invoiceId}/payments`, {
+  const response = await api.post(`/api/invoices/${invoiceId}/payments`, {
     amount_centimes,
     type,
     payment_method,

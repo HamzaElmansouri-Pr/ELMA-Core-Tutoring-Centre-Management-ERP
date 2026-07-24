@@ -1,12 +1,4 @@
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
-  withCredentials: true,
-  headers: {
-    'Accept': 'application/json',
-  },
-});
+import api from '@/lib/axios';
 
 export interface GlobalSettings {
   center_name: string;
@@ -17,12 +9,12 @@ export interface GlobalSettings {
 }
 
 export const getSettings = async (): Promise<GlobalSettings> => {
-  const response = await api.get('/settings');
+  const response = await api.get('/api/settings');
   return response.data.data;
 };
 
 export const updateSettings = async (data: FormData): Promise<GlobalSettings> => {
-  const response = await api.post('/settings', data, {
+  const response = await api.post('/api/settings', data, {
     headers: { 'Content-Type': 'multipart/form-data' }
   });
   return response.data.data;

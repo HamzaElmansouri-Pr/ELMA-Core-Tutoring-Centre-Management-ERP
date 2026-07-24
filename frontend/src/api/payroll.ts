@@ -1,13 +1,4 @@
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
-  withCredentials: true,
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json',
-  },
-});
+import api from '@/lib/axios';
 
 export interface PayrollBreakdownItem {
   allocation_id: number;
@@ -43,16 +34,16 @@ export interface TeacherPayrollSummary {
 }
 
 export const getPayrollSummaries = async (month: number, year: number): Promise<TeacherPayrollSummary[]> => {
-  const response = await api.get('/payroll', { params: { month, year } });
+  const response = await api.get('/api/payroll', { params: { month, year } });
   return response.data.data;
 };
 
 export const calculatePayroll = async (teacher_id: number, month: number, year: number): Promise<PayrollRecord> => {
-  const response = await api.post('/payroll/calculate', { teacher_id, month, year });
+  const response = await api.post('/api/payroll/calculate', { teacher_id, month, year });
   return response.data.data;
 };
 
 export const markPayrollPaid = async (record_id: number): Promise<PayrollRecord> => {
-  const response = await api.post(`/payroll/${record_id}/mark-paid`);
+  const response = await api.post(`/api/payroll/${record_id}/mark-paid`);
   return response.data.data;
 };

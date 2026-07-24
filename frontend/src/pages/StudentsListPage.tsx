@@ -104,7 +104,7 @@ export function StudentsListPage() {
         </Button>
       </div>
 
-      <div className="border rounded-md bg-white overflow-hidden">
+      <div className="border rounded-md bg-white dark:bg-slate-900 overflow-hidden">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

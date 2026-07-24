@@ -1,13 +1,4 @@
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
-  withCredentials: true,
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json',
-  },
-});
+import api from '@/lib/axios';
 
 export interface DashboardKPIs {
   revenue_this_month_centimes: number;
@@ -25,16 +16,16 @@ export interface UnpaidAlert {
 }
 
 export const getDashboardKPIs = async (): Promise<DashboardKPIs> => {
-  const response = await api.get('/dashboard/kpis');
+  const response = await api.get('/api/dashboard/kpis');
   return response.data.data;
 };
 
 export const getUnpaidAlerts = async (): Promise<UnpaidAlert[]> => {
-  const response = await api.get('/dashboard/unpaid-alerts');
+  const response = await api.get('/api/dashboard/unpaid-alerts');
   return response.data.data;
 };
 
 export const getProfitBreakdown = async (): Promise<any[]> => {
-  const response = await api.get('/dashboard/profit-breakdown');
+  const response = await api.get('/api/dashboard/profit-breakdown');
   return response.data.data;
 };

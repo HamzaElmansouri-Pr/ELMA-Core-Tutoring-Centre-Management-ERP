@@ -7,7 +7,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { getTeachers, Teacher, deleteTeacher } from "@/api/teachers";
+import { getTeachers, type Teacher, deleteTeacher } from "@/api/teachers";
 import { TeacherFormDialog } from "@/components/teachers/TeacherFormDialog";
 import { Button } from "@/components/ui/button";
 import { Plus, Edit, Trash2 } from "lucide-react";
@@ -94,7 +94,7 @@ export function TeachersListPage() {
         </Button>
       </div>
 
-      <div className="border rounded-md bg-white overflow-hidden">
+      <div className="border rounded-md bg-white dark:bg-slate-900 overflow-hidden">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

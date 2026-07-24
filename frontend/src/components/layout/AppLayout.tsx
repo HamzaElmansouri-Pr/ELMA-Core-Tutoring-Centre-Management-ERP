@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
 import LanguageSwitcher from '../LanguageSwitcher';
 
+import { ModeToggle } from '../ModeToggle';
+
 const AppLayout: React.FC = () => {
   const { t } = useTranslation();
   const { user, logout } = useAuthStore();
@@ -34,6 +36,7 @@ const AppLayout: React.FC = () => {
              {/* Mobile menu button could go here */}
           </div>
           <div className="flex items-center gap-4">
+            <ModeToggle />
             <LanguageSwitcher />
             
             <div className="text-sm font-medium">

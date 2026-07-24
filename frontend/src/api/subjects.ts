@@ -1,13 +1,4 @@
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
-  withCredentials: true,
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json',
-  },
-});
+import api from '@/lib/axios';
 
 export interface Subject {
   id: number;
@@ -17,20 +8,20 @@ export interface Subject {
 }
 
 export const getSubjects = async (): Promise<Subject[]> => {
-  const response = await api.get('/subjects');
+  const response = await api.get('/api/subjects');
   return response.data.data;
 };
 
 export const createSubject = async (data: Omit<Subject, 'id'>): Promise<Subject> => {
-  const response = await api.post('/subjects', data);
+  const response = await api.post('/api/subjects', data);
   return response.data.data;
 };
 
 export const updateSubject = async (id: number, data: Partial<Subject>): Promise<Subject> => {
-  const response = await api.put(`/subjects/${id}`, data);
+  const response = await api.put(`/api/subjects/${id}`, data);
   return response.data.data;
 };
 
 export const deleteSubject = async (id: number): Promise<void> => {
-  await api.delete(`/subjects/${id}`);
+  await api.delete(`/api/subjects/${id}`);
 };
