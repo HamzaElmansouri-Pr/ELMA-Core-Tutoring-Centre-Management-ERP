@@ -15,7 +15,7 @@ const loginSchema = z.object({
 type LoginFormInputs = z.infer<typeof loginSchema>;
 
 const LoginPage: React.FC = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('common');
   const [error, setError] = useState('');
   const { setUser } = useAuthStore();
   const navigate = useNavigate();

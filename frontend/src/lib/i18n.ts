@@ -15,6 +15,8 @@ i18n
       fr,
       ar,
     },
+    defaultNS: 'common',
+    ns: ['common'],
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false, // react already safes from xss

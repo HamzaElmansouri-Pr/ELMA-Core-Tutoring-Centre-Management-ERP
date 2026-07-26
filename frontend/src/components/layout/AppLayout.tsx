@@ -7,7 +7,7 @@ import LanguageSwitcher from '../LanguageSwitcher';
 import { ModeToggle } from '../ModeToggle';
 
 const AppLayout: React.FC = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('common');
   const { user, logout } = useAuthStore();
 
   return (
@@ -24,8 +24,8 @@ const AppLayout: React.FC = () => {
           <Link to="/subjects" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">{t('sidebar_subjects', 'Subjects')}</Link>
           <Link to="/classes" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">{t('sidebar_classes', 'Classes')}</Link>
           <Link to="/payments" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-green-600 dark:text-green-400">{t('sidebar_payments', 'Payments')}</Link>
-          <Link to="/finance" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">Finance</Link>
-          <Link to="/settings" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">Settings</Link>
+          <Link to="/finance" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">{t('sidebar_finance', 'Finance')}</Link>
+          <Link to="/settings" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">{t('sidebar_settings', 'Settings')}</Link>
         </nav>
       </aside>
 
@@ -48,7 +48,7 @@ const AppLayout: React.FC = () => {
               onClick={logout}
               className="text-sm text-red-600 hover:text-red-800"
             >
-              Logout
+              {t('logout', 'Logout')}
             </button>
           </div>
         </header>

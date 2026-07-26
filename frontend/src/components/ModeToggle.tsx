@@ -11,7 +11,7 @@ import { useTranslation } from "react-i18next"
 
 export function ModeToggle() {
   const { setTheme } = useTheme()
-  const { t } = useTranslation()
+  const { t } = useTranslation('common')
 
   return (
     <DropdownMenu>
