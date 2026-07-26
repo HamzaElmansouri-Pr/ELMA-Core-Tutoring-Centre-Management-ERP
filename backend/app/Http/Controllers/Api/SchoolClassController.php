@@ -14,9 +14,29 @@ class SchoolClassController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return SchoolClassResource::collection(SchoolClass::with(['subject', 'teacher'])->withCount('enrollments')->get());
+        $query = SchoolClass::with(['subject:id,name', 'teacher:id,name,email,phone'])->withCount('enrollments');
+
+        if ($request->filled('search')) {
+            $search = trim($request->input('search'));
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhereHas('subject', function ($sq) use ($search) {
+                      $sq->where('name', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('teacher', function ($tq) use ($search) {
+                      $tq->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $perPage = (int) $request->input('per_page', 15);
+        if ($perPage < 1 || $perPage > 100) {
+            $perPage = 15;
+        }
+
+        return SchoolClassResource::collection($query->latest()->paginate($perPage));
     }
 
     /**

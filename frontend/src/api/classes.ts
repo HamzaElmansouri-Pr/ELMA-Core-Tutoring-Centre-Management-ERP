@@ -28,6 +28,11 @@ export const getClasses = async (): Promise<SchoolClass[]> => {
   return response.data.data;
 };
 
+export const getClassesPaginated = async (params?: { search?: string; page?: number; per_page?: number }): Promise<{ data: SchoolClass[]; meta: any }> => {
+  const response = await api.get('/api/school-classes', { params });
+  return response.data;
+};
+
 export const createClass = async (data: Omit<SchoolClass, 'id' | 'subject' | 'teacher' | 'enrollments_count'>): Promise<SchoolClass> => {
   const response = await api.post('/api/school-classes', data);
   return response.data.data;

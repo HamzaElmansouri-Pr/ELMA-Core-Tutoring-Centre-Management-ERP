@@ -1,11 +1,13 @@
+import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getDashboardKPIs, getUnpaidAlerts, getProfitBreakdown } from "@/api/dashboard";
 import { formatDH } from "@/utils/currency";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { Link } from "react-router-dom";
 import { ArrowRight, MessageCircleWarning } from "lucide-react";
 import { useTranslation } from "react-i18next";
+
+const RevenueChart = React.lazy(() => import("@/components/dashboard/RevenueChart"));
 
 export function DashboardPage() {
   const { t } = useTranslation("common");
@@ -16,11 +18,6 @@ export function DashboardPage() {
 
   // Generate dynamic line colors for the chart
   const colors = ["#2563eb", "#16a34a", "#dc2626", "#ca8a04", "#9333ea", "#0891b2"];
-
-  // Recharts XAxis reversing issue: 
-  // In RTL mode, Recharts sometimes naturally reverses, sometimes doesn't depending on version.
-  // We explicitly want to ensure chronological order is preserved. If we pass the data sequentially, it usually graphs LTR.
-  // We can enforce dir="ltr" just on the chart container to be extremely safe, ensuring time always flows left-to-right.
 
   return (
     <div className="p-6 space-y-6">
@@ -70,31 +67,9 @@ export function DashboardPage() {
             <CardTitle>Revenue by Subject (Last 6 Months)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-80 w-full" dir="ltr"> {/* Enforce LTR so time flows left-to-right */}
-              {breakdown && breakdown.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={breakdown} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis tickFormatter={(val) => `${val / 100} DH`} />
-                    <Tooltip formatter={(value: any) => new Intl.NumberFormat(undefined, { style: 'currency', currency: 'DZD' }).format(value)} />
-                    <Legend />
-                    {Object.keys(breakdown[0] || {}).filter(k => k !== 'name').map((subject, idx) => (
-                      <Line 
-                        key={subject} 
-                        type="monotone" 
-                        dataKey={subject} 
-                        stroke={colors[idx % colors.length]} 
-                        strokeWidth={2}
-                        activeDot={{ r: 8 }} 
-                      />
-                    ))}
-                  </LineChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-full flex items-center justify-center text-gray-400">Loading chart data...</div>
-              )}
-            </div>
+            <React.Suspense fallback={<div className="h-80 w-full flex items-center justify-center text-gray-400 animate-pulse bg-gray-50 dark:bg-gray-800 rounded-lg">Loading chart data...</div>}>
+              <RevenueChart breakdown={breakdown} colors={colors} />
+            </React.Suspense>
           </CardContent>
         </Card>
 

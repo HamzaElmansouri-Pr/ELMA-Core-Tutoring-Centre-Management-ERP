@@ -1,24 +1,23 @@
+import React from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
 import AppLayout from './components/layout/AppLayout';
 import LoginPage from './pages/LoginPage';
 import LanguageSelectScreen from './pages/LanguageSelectScreen';
 
-import { TeachersListPage } from './pages/TeachersListPage';
-import { StudentsListPage } from './pages/StudentsListPage';
-import { StudentDetailPage } from './pages/StudentDetailPage';
-
-import { SubjectsListPage } from './pages/SubjectsListPage';
-import { ClassesListPage } from './pages/ClassesListPage';
-
-import { BillingCenterPage } from './pages/BillingCenterPage';
-import { InvoicesListPage } from './pages/InvoicesListPage';
-import { InvoiceDetailPage } from './pages/InvoiceDetailPage';
-import { PaymentsPage } from './pages/PaymentsPage';
-import { PayrollPage } from './pages/PayrollPage';
-import { TimetablePage } from './pages/TimetablePage';
-import { SettingsPage } from './pages/SettingsPage';
-import { DashboardPage } from './pages/DashboardPage';
+const TeachersListPage = React.lazy(() => import('./pages/TeachersListPage').then(m => ({ default: m.TeachersListPage })));
+const StudentsListPage = React.lazy(() => import('./pages/StudentsListPage').then(m => ({ default: m.StudentsListPage })));
+const StudentDetailPage = React.lazy(() => import('./pages/StudentDetailPage').then(m => ({ default: m.StudentDetailPage })));
+const SubjectsListPage = React.lazy(() => import('./pages/SubjectsListPage').then(m => ({ default: m.SubjectsListPage })));
+const ClassesListPage = React.lazy(() => import('./pages/ClassesListPage').then(m => ({ default: m.ClassesListPage })));
+const BillingCenterPage = React.lazy(() => import('./pages/BillingCenterPage').then(m => ({ default: m.BillingCenterPage })));
+const InvoicesListPage = React.lazy(() => import('./pages/InvoicesListPage').then(m => ({ default: m.InvoicesListPage })));
+const InvoiceDetailPage = React.lazy(() => import('./pages/InvoiceDetailPage').then(m => ({ default: m.InvoiceDetailPage })));
+const PaymentsPage = React.lazy(() => import('./pages/PaymentsPage').then(m => ({ default: m.PaymentsPage })));
+const PayrollPage = React.lazy(() => import('./pages/PayrollPage').then(m => ({ default: m.PayrollPage })));
+const TimetablePage = React.lazy(() => import('./pages/TimetablePage').then(m => ({ default: m.TimetablePage })));
+const SettingsPage = React.lazy(() => import('./pages/SettingsPage').then(m => ({ default: m.SettingsPage })));
+const DashboardPage = React.lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
 
 const LanguageGatekeeper = ({ children }: { children: React.ReactNode }) => {
     const isLangSet = localStorage.getItem('i18nextLng_set');

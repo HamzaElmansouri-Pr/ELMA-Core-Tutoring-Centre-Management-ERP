@@ -10,10 +10,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
     
+    Route::get('teachers/all', [\App\Http\Controllers\TeacherController::class, 'all']);
     Route::apiResource('teachers', \App\Http\Controllers\TeacherController::class);
     Route::get('students/search', [\App\Http\Controllers\StudentController::class, 'search']);
     Route::post('students/{student}/bulk-enroll', [\App\Http\Controllers\StudentController::class, 'bulkEnroll']);
     Route::apiResource('students', \App\Http\Controllers\StudentController::class);
+    Route::get('subjects/all', [\App\Http\Controllers\Api\SubjectController::class, 'all']);
     Route::apiResource('subjects', \App\Http\Controllers\Api\SubjectController::class);
     Route::apiResource('school-classes', \App\Http\Controllers\Api\SchoolClassController::class);
     

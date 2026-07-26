@@ -1,13 +1,14 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { getTeachers, type Teacher, deleteTeacher } from "@/api/teachers";
+import { getTeachersPaginated, type Teacher, deleteTeacher } from "@/api/teachers";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 import { TeacherFormDialog } from "@/components/teachers/TeacherFormDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,21 +29,26 @@ export function TeachersListPage() {
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(15);
 
-  const { data: teachers = [], refetch, isLoading } = useQuery({
-    queryKey: ["teachers"],
-    queryFn: getTeachers,
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const { data: response, refetch, isLoading } = useQuery({
+    queryKey: ["teachersPaginated", page, perPage, debouncedSearch],
+    queryFn: () => getTeachersPaginated({ page, per_page: perPage, search: debouncedSearch }),
+    placeholderData: keepPreviousData,
   });
 
-  const filteredTeachers = useMemo(() => {
-    if (!searchQuery.trim()) return teachers;
-    const q = searchQuery.toLowerCase().trim();
-    return teachers.filter(tc => 
-      tc.name?.toLowerCase().includes(q) ||
-      tc.phone?.toLowerCase().includes(q) ||
-      tc.whatsapp_phone?.toLowerCase().includes(q)
-    );
-  }, [teachers, searchQuery]);
+  const teachers = response?.data || [];
+  const meta = response?.meta || null;
 
   const handleEdit = (teacher: Teacher) => {
     setSelectedTeacher(teacher);
@@ -61,7 +67,7 @@ export function TeachersListPage() {
     setIsDialogOpen(true);
   };
 
-  const columns = [
+  const columns = useMemo(() => [
     columnHelper.accessor("name", {
       header: t("name"),
       cell: (info) => info.getValue(),
@@ -88,10 +94,10 @@ export function TeachersListPage() {
         </div>
       ),
     }),
-  ];
+  ], [t, teachers]);
 
   const table = useReactTable({
-    data: filteredTeachers,
+    data: teachers,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
@@ -137,11 +143,15 @@ export function TeachersListPage() {
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="text-center py-10">
-                  Loading...
-                </TableCell>
-              </TableRow>
+              Array.from({ length: 8 }).map((_, idx) => (
+                <TableRow key={idx}>
+                  {Array.from({ length: columns.length }).map((_, cIdx) => (
+                    <TableCell key={cIdx} className="py-4">
+                      <div className={`h-4 bg-gray-100 dark:bg-gray-800 rounded animate-pulse ${cIdx === 0 ? 'w-36' : cIdx === 1 ? 'w-20' : 'w-24'}`} />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
             ) : table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
@@ -161,6 +171,15 @@ export function TeachersListPage() {
             )}
           </TableBody>
         </Table>
+        <PaginationControls
+          meta={meta}
+          onPageChange={(newPage) => setPage(newPage)}
+          onPerPageChange={(newPerPage) => {
+            setPerPage(newPerPage);
+            setPage(1);
+          }}
+          isLoading={isLoading}
+        />
       </div>
 
       {isDialogOpen && (

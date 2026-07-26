@@ -4,8 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useQuery } from "@tanstack/react-query";
 import { type SchoolClass, createClass, updateClass } from "@/api/classes";
-import { getSubjects } from "@/api/subjects";
-import { getTeachers } from "@/api/teachers";
+import { getSubjectsAll } from "@/api/subjects";
+import { getTeachersAll } from "@/api/teachers";
 import {
   Dialog,
   DialogContent,
@@ -43,8 +43,8 @@ export function ClassFormDialog({
 }: ClassFormDialogProps) {
   const { t } = useTranslation("common");
 
-  const { data: subjects = [] } = useQuery({ queryKey: ["subjects"], queryFn: getSubjects });
-  const { data: teachers = [] } = useQuery({ queryKey: ["teachers"], queryFn: getTeachers });
+  const { data: subjects = [] } = useQuery({ queryKey: ["subjectsAll"], queryFn: getSubjectsAll });
+  const { data: teachers = [] } = useQuery({ queryKey: ["teachersAll"], queryFn: getTeachersAll });
 
   const {
     register,

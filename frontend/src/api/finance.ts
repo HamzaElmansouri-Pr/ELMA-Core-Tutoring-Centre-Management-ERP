@@ -39,7 +39,7 @@ export const generateInvoices = async (month: number, year: number): Promise<{ m
   return response.data;
 };
 
-export const getInvoices = async (params?: { status?: string; month?: number; year?: number; page?: number }): Promise<{ data: Invoice[]; meta: any }> => {
+export const getInvoices = async (params?: { status?: string; month?: number; year?: number; page?: number; per_page?: number; search?: string }): Promise<{ data: Invoice[]; meta: any }> => {
   const response = await api.get('/api/invoices', { params });
   return response.data;
 };

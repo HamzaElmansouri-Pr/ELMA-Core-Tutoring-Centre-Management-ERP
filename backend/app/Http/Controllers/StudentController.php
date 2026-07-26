@@ -49,9 +49,36 @@ class StudentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return StudentResource::collection(Student::withCount(['activeEnrollments', 'unpaidInvoices'])->latest()->get());
+        $query = Student::withCount(['activeEnrollments', 'unpaidInvoices']);
+
+        if ($request->filled('search')) {
+            $search = trim($request->input('search'));
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                  ->orWhere('last_name', 'like', "%{$search}%")
+                  ->orWhere('parent_phone', 'like', "%{$search}%");
+                
+                if (str_contains($search, ' ')) {
+                    $parts = explode(' ', $search, 2);
+                    $q->orWhere(function ($sub) use ($parts) {
+                        $sub->where('first_name', 'like', "%{$parts[0]}%")
+                            ->where('last_name', 'like', "%{$parts[1]}%");
+                    })->orWhere(function ($sub) use ($parts) {
+                        $sub->where('last_name', 'like', "%{$parts[0]}%")
+                            ->where('first_name', 'like', "%{$parts[1]}%");
+                    });
+                }
+            });
+        }
+
+        $perPage = (int) $request->input('per_page', 15);
+        if ($perPage < 1 || $perPage > 100) {
+            $perPage = 15;
+        }
+
+        return StudentResource::collection($query->latest()->paginate($perPage));
     }
 
     /**

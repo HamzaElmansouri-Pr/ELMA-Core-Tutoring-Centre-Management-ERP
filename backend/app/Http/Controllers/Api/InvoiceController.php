@@ -30,19 +30,35 @@ class InvoiceController extends Controller
 
     public function index(Request $request)
     {
-        $query = Invoice::with(['student']);
+        $query = Invoice::with(['student:id,first_name,last_name,parent_phone']);
 
-        if ($request->has('status')) {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-        if ($request->has('month')) {
+        if ($request->filled('month')) {
             $query->where('month', $request->month);
         }
-        if ($request->has('year')) {
+        if ($request->filled('year')) {
             $query->where('year', $request->year);
         }
+        if ($request->filled('search')) {
+            $search = trim($request->input('search'));
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                  ->orWhereHas('student', function ($sq) use ($search) {
+                      $sq->where('first_name', 'like', "%{$search}%")
+                         ->orWhere('last_name', 'like', "%{$search}%")
+                         ->orWhere('parent_phone', 'like', "%{$search}%");
+                  });
+            });
+        }
 
-        return InvoiceResource::collection($query->orderBy('created_at', 'desc')->paginate(50));
+        $perPage = (int) $request->input('per_page', 15);
+        if ($perPage < 1 || $perPage > 100) {
+            $perPage = 15;
+        }
+
+        return InvoiceResource::collection($query->orderBy('created_at', 'desc')->paginate($perPage));
     }
 
     public function show(Invoice $invoice)

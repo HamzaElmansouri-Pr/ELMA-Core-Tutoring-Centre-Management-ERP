@@ -16,13 +16,40 @@ class PaymentController extends Controller
     /**
      * Get a list of all payments.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $payments = Payment::with(['invoice.student', 'invoice.items.schoolClass.subject'])
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query = Payment::with([
+            'invoice:id,student_id,month,year,total_amount_centimes,paid_amount_centimes,balance_due_centimes,status',
+            'invoice.student:id,first_name,last_name,parent_phone',
+            'invoice.items:id,invoice_id,school_class_id,amount_centimes',
+            'invoice.items.schoolClass:id,name,subject_id,teacher_id,price_centimes',
+            'invoice.items.schoolClass.subject:id,name'
+        ]);
 
-        return response()->json(['data' => $payments]);
+        if ($request->filled('search')) {
+            $search = trim($request->input('search'));
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                  ->orWhere('payment_method', 'like', "%{$search}%")
+                  ->orWhereHas('invoice', function ($iq) use ($search) {
+                      $iq->where('id', 'like', "%{$search}%")
+                         ->orWhereHas('student', function ($sq) use ($search) {
+                             $sq->where('first_name', 'like', "%{$search}%")
+                                ->orWhere('last_name', 'like', "%{$search}%")
+                                ->orWhere('parent_phone', 'like', "%{$search}%");
+                         });
+                  });
+            });
+        }
+
+        $perPage = (int) $request->input('per_page', 15);
+        if ($perPage < 1 || $perPage > 100) {
+            $perPage = 15;
+        }
+
+        $paginated = $query->orderBy('created_at', 'desc')->paginate($perPage);
+
+        return response()->json($paginated);
     }
 
     /**

@@ -1,7 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { getPayments, downloadReceipt, type PaymentRecord } from "@/api/payments";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 import { PaymentWizardDialog } from "@/components/payments/PaymentWizardDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,34 +17,33 @@ import {
 } from "@/components/ui/table";
 import { formatDH } from "@/utils/currency";
 import { Link } from "react-router-dom";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 
 export function PaymentsPage() {
   const { t } = useTranslation("common");
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(15);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["payments"],
-    queryFn: getPayments,
+    queryKey: ["payments", page, perPage, debouncedSearch],
+    queryFn: () => getPayments({ page, per_page: perPage, search: debouncedSearch }),
+    placeholderData: keepPreviousData,
   });
 
-  const [searchQuery, setSearchQuery] = useState("");
   const payments = data?.data || [];
-
-  const filteredPayments = useMemo(() => {
-    if (!searchQuery.trim()) return payments;
-    const q = searchQuery.toLowerCase().trim();
-    return payments.filter((payment: PaymentRecord) => {
-      const student = payment.invoice?.student;
-      const studentName = student ? `${student.first_name} ${student.last_name}`.toLowerCase() : "";
-      const classes = payment.invoice?.items
-        ?.map((item) => item.school_class?.name || item.school_class?.subject?.name || "")
-        .join(" ").toLowerCase() || "";
-      const idStr = `#${payment.id}`;
-      const methodStr = payment.payment_method?.toLowerCase() || "";
-      return idStr.includes(q) || studentName.includes(q) || classes.includes(q) || methodStr.includes(q) || String(payment.id).includes(q);
-    });
-  }, [payments, searchQuery]);
+  const meta = data?.meta || null;
 
   const handleDownload = async (id: number) => {
     try {
@@ -90,7 +90,7 @@ export function PaymentsPage() {
         </h2>
 
         {isLoading ? (
-          <div className="py-10 text-center text-gray-500">Loading payments...</div>
+          <TableSkeleton columns={8} rows={8} headers={["Receipt #", "Date", "Student", "Invoice Period", "Classes Included", "Method", "Amount Paid", "Action"]} />
         ) : (
           <Table>
             <TableHeader>
@@ -106,7 +106,7 @@ export function PaymentsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredPayments.map((payment: PaymentRecord) => {
+              {payments.map((payment: PaymentRecord) => {
                 const student = payment.invoice?.student;
                 const studentName = student ? `${student.first_name} ${student.last_name}` : "Unknown Student";
                 const classes = payment.invoice?.items
@@ -155,7 +155,7 @@ export function PaymentsPage() {
                   </TableRow>
                 );
               })}
-              {filteredPayments.length === 0 && (
+              {payments.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={8} className="h-48 text-center">
                     <div className="flex flex-col items-center justify-center text-gray-500">
@@ -179,6 +179,15 @@ export function PaymentsPage() {
             </TableBody>
           </Table>
         )}
+        <PaginationControls
+          meta={meta}
+          onPageChange={(newPage) => setPage(newPage)}
+          onPerPageChange={(newPerPage) => {
+            setPerPage(newPerPage);
+            setPage(1);
+          }}
+          isLoading={isLoading}
+        />
       </div>
 
       {isWizardOpen && (

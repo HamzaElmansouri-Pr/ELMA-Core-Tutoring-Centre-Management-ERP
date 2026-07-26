@@ -1,13 +1,14 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { getSubjects, type Subject, deleteSubject } from "@/api/subjects";
+import { getSubjectsPaginated, type Subject, deleteSubject } from "@/api/subjects";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 import { SubjectFormDialog } from "@/components/subjects/SubjectFormDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,20 +29,26 @@ export function SubjectsListPage() {
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(15);
 
-  const { data: subjects = [], refetch, isLoading } = useQuery({
-    queryKey: ["subjects"],
-    queryFn: getSubjects,
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const { data: response, refetch, isLoading } = useQuery({
+    queryKey: ["subjectsPaginated", page, perPage, debouncedSearch],
+    queryFn: () => getSubjectsPaginated({ page, per_page: perPage, search: debouncedSearch }),
+    placeholderData: keepPreviousData,
   });
 
-  const filteredSubjects = useMemo(() => {
-    if (!searchQuery.trim()) return subjects;
-    const q = searchQuery.toLowerCase().trim();
-    return subjects.filter(sub => 
-      sub.name?.toLowerCase().includes(q) ||
-      sub.description?.toLowerCase().includes(q)
-    );
-  }, [subjects, searchQuery]);
+  const subjects = response?.data || [];
+  const meta = response?.meta || null;
 
   const handleEdit = (subject: Subject) => {
     setSelectedSubject(subject);
@@ -60,7 +67,7 @@ export function SubjectsListPage() {
     setIsDialogOpen(true);
   };
 
-  const columns = [
+  const columns = useMemo(() => [
     columnHelper.accessor("name", {
       header: t("name"),
       cell: (info) => info.getValue(),
@@ -84,10 +91,10 @@ export function SubjectsListPage() {
         </div>
       ),
     }),
-  ];
+  ], [t, subjects]);
 
   const table = useReactTable({
-    data: filteredSubjects,
+    data: subjects,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
@@ -133,11 +140,15 @@ export function SubjectsListPage() {
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="text-center py-10">
-                  Loading...
-                </TableCell>
-              </TableRow>
+              Array.from({ length: 6 }).map((_, idx) => (
+                <TableRow key={idx}>
+                  {Array.from({ length: columns.length }).map((_, cIdx) => (
+                    <TableCell key={cIdx} className="py-4">
+                      <div className={`h-4 bg-gray-100 dark:bg-gray-800 rounded animate-pulse ${cIdx === 0 ? 'w-32' : 'w-48'}`} />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
             ) : table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
@@ -157,6 +168,15 @@ export function SubjectsListPage() {
             )}
           </TableBody>
         </Table>
+        <PaginationControls
+          meta={meta}
+          onPageChange={(newPage) => setPage(newPage)}
+          onPerPageChange={(newPerPage) => {
+            setPerPage(newPerPage);
+            setPage(1);
+          }}
+          isLoading={isLoading}
+        />
       </div>
 
       {isDialogOpen && (

@@ -1,7 +1,8 @@
-import { useState, useMemo } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getPayrollSummaries, calculatePayroll, markPayrollPaid } from "@/api/payroll";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
+import { getPayrollSummariesPaginated, calculatePayroll, markPayrollPaid } from "@/api/payroll";
 import type { TeacherPayrollSummary, PayrollBreakdownItem } from "@/api/payroll";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -9,6 +10,7 @@ import { formatDH } from "@/utils/currency";
 import { Calculator, Lock, Eye, AlertTriangle, Search } from "lucide-react";
 import { PayrollBreakdownDialog } from "@/components/finance/PayrollBreakdownDialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 
 export function PayrollPage() {
   const queryClient = useQueryClient();
@@ -23,21 +25,27 @@ export function PayrollPage() {
     open: false, recordId: null
   });
 
-  const { data: summaries = [], isLoading } = useQuery({
-    queryKey: ["payroll", month, year],
-    queryFn: () => getPayrollSummaries(month, year),
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(15);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const { data: response, isLoading } = useQuery({
+    queryKey: ["payroll", month, year, page, perPage, debouncedSearch],
+    queryFn: () => getPayrollSummariesPaginated(month, year, { page, per_page: perPage, search: debouncedSearch }),
+    placeholderData: keepPreviousData,
   });
 
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const filteredSummaries = useMemo(() => {
-    if (!searchQuery.trim()) return summaries;
-    const q = searchQuery.toLowerCase().trim();
-    return summaries.filter((s: TeacherPayrollSummary) => 
-      s.teacher_name?.toLowerCase().includes(q) ||
-      s.status?.toLowerCase().includes(q)
-    );
-  }, [summaries, searchQuery]);
+  const summaries: TeacherPayrollSummary[] = response?.data || [];
+  const meta = response?.meta || null;
 
   const calcMutation = useMutation({
     mutationFn: (teacher_id: number) => calculatePayroll(teacher_id, month, year),
@@ -94,7 +102,7 @@ export function PayrollPage() {
           Payroll is calculated on a pure <b>Cash-basis</b>. It aggregates all physical payments (and refunds) collected during {month}/{year}.
         </p>
         {isLoading ? (
-          <div>Loading...</div>
+          <TableSkeleton columns={6} rows={6} headers={["Teacher", "Commission %", "Gross Collected", "Final Payout", "Status", "Actions"]} />
         ) : (
           <Table>
             <TableHeader>
@@ -108,7 +116,7 @@ export function PayrollPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredSummaries.map((summary) => (
+              {summaries.map((summary) => (
                 <TableRow key={summary.teacher_id}>
                   <TableCell className="font-medium">{summary.teacher_name}</TableCell>
                   <TableCell>{summary.commission_percentage}%</TableCell>
@@ -162,7 +170,7 @@ export function PayrollPage() {
                   </TableCell>
                 </TableRow>
               ))}
-              {filteredSummaries.length === 0 && (
+              {summaries.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-4">No teachers found.</TableCell>
                 </TableRow>
@@ -170,6 +178,15 @@ export function PayrollPage() {
             </TableBody>
           </Table>
         )}
+        <PaginationControls
+          meta={meta}
+          onPageChange={(newPage) => setPage(newPage)}
+          onPerPageChange={(newPerPage) => {
+            setPerPage(newPerPage);
+            setPage(1);
+          }}
+          isLoading={isLoading}
+        />
       </div>
 
       <PayrollBreakdownDialog

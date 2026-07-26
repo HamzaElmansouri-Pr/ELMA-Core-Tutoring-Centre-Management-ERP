@@ -10,7 +10,7 @@ class TimetableController extends Controller
 {
     public function index()
     {
-        $classes = SchoolClass::with(['subject', 'teacher', 'sessions'])->get();
+        $classes = SchoolClass::with(['subject', 'teacher', 'sessions'])->where('is_active', true)->get();
         $blocks = [];
 
         foreach ($classes as $class) {

@@ -11,6 +11,16 @@ export const getSubjects = async (): Promise<Subject[]> => {
   return response.data.data;
 };
 
+export const getSubjectsPaginated = async (params?: { search?: string; page?: number; per_page?: number }): Promise<{ data: Subject[]; meta: any }> => {
+  const response = await api.get('/api/subjects', { params });
+  return response.data;
+};
+
+export const getSubjectsAll = async (): Promise<Subject[]> => {
+  const response = await api.get('/api/subjects/all');
+  return response.data.data;
+};
+
 export const createSubject = async (data: Omit<Subject, 'id'>): Promise<Subject> => {
   const response = await api.post('/api/subjects', data);
   return response.data.data;

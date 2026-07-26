@@ -51,8 +51,8 @@ export interface PaymentRecord {
     };
 }
 
-export const getPayments = async (): Promise<{ data: PaymentRecord[] }> => {
-    const response = await api.get('/api/payments');
+export const getPayments = async (params?: { page?: number; per_page?: number; search?: string }): Promise<{ data: PaymentRecord[]; meta?: any }> => {
+    const response = await api.get('/api/payments', { params });
     return response.data;
 };
 

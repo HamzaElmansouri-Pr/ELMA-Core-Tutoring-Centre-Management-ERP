@@ -6,15 +6,46 @@ use App\Models\Teacher;
 use App\Http\Resources\TeacherResource;
 use App\Http\Requests\StoreTeacherRequest;
 use App\Http\Requests\UpdateTeacherRequest;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class TeacherController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return TeacherResource::collection(Teacher::latest()->get());
+        $query = Teacher::query();
+
+        if ($request->filled('search')) {
+            $search = trim($request->input('search'));
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhere('whatsapp_phone', 'like', "%{$search}%");
+            });
+        }
+
+        $perPage = (int) $request->input('per_page', 15);
+        if ($perPage < 1 || $perPage > 100) {
+            $perPage = 15;
+        }
+
+        return TeacherResource::collection($query->latest()->paginate($perPage));
+    }
+
+    /**
+     * Get all active teachers for form dropdowns (cached).
+     */
+    public function all()
+    {
+        $teachers = Cache::rememberForever('teachers_all', function () {
+            return Teacher::where('is_active', true)->orderBy('name')->get();
+        });
+
+        return TeacherResource::collection($teachers);
     }
 
     /**
@@ -23,6 +54,7 @@ class TeacherController extends Controller
     public function store(StoreTeacherRequest $request)
     {
         $teacher = Teacher::create($request->validated());
+        Cache::forget('teachers_all');
         return new TeacherResource($teacher);
     }
 
@@ -40,6 +72,7 @@ class TeacherController extends Controller
     public function update(UpdateTeacherRequest $request, Teacher $teacher)
     {
         $teacher->update($request->validated());
+        Cache::forget('teachers_all');
         return new TeacherResource($teacher);
     }
 
@@ -59,6 +92,7 @@ class TeacherController extends Controller
         }
 
         $teacher->delete();
+        Cache::forget('teachers_all');
         return response()->noContent();
     }
 }

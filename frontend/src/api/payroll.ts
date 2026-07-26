@@ -35,7 +35,12 @@ export interface TeacherPayrollSummary {
 
 export const getPayrollSummaries = async (month: number, year: number): Promise<TeacherPayrollSummary[]> => {
   const response = await api.get('/api/payroll', { params: { month, year } });
-  return response.data.data;
+  return response.data.data || response.data;
+};
+
+export const getPayrollSummariesPaginated = async (month: number, year: number, params?: { page?: number; per_page?: number; search?: string }): Promise<{ data: TeacherPayrollSummary[]; meta?: any }> => {
+  const response = await api.get('/api/payroll', { params: { month, year, ...params } });
+  return response.data;
 };
 
 export const calculatePayroll = async (teacher_id: number, month: number, year: number): Promise<PayrollRecord> => {

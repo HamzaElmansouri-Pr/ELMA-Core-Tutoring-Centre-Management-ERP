@@ -20,11 +20,23 @@ class PayrollController extends Controller
         $month = $request->month;
         $year = $request->year;
 
-        $teachers = Teacher::with(['payrollRecords' => function($q) use ($month, $year) {
+        $query = Teacher::with(['payrollRecords' => function($q) use ($month, $year) {
             $q->where('month', $month)->where('year', $year);
-        }])->get();
+        }]);
 
-        $data = $teachers->map(function ($teacher) {
+        if ($request->filled('search')) {
+            $search = trim($request->input('search'));
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        $perPage = (int) $request->input('per_page', 15);
+        if ($perPage < 1 || $perPage > 100) {
+            $perPage = 15;
+        }
+
+        $paginated = $query->orderBy('name')->paginate($perPage);
+
+        $paginated->through(function ($teacher) {
             $record = $teacher->payrollRecords->first();
             return [
                 'teacher_id' => $teacher->id,
@@ -37,7 +49,7 @@ class PayrollController extends Controller
             ];
         });
 
-        return response()->json(['data' => $data]);
+        return response()->json($paginated);
     }
 
     public function calculate(Request $request, CalculateTeacherPayrollAction $action)

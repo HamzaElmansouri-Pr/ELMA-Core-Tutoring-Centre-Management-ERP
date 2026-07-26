@@ -17,6 +17,11 @@ export const getStudents = async (): Promise<Student[]> => {
   return response.data.data;
 };
 
+export const getStudentsPaginated = async (params?: { search?: string; page?: number; per_page?: number }): Promise<{ data: Student[]; meta: any }> => {
+  const response = await api.get('/api/students', { params });
+  return response.data;
+};
+
 export const getStudent = async (id: number): Promise<Student> => {
   const response = await api.get(`/api/students/${id}`);
   return response.data.data;

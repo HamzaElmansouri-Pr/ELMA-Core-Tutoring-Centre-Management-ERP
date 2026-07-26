@@ -22,6 +22,8 @@ class StudentResource extends JsonResource
             'parent_phone' => $this->parent_phone,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'active_enrollments_count' => $this->whenCounted('activeEnrollments'),
+            'unpaid_invoices_count' => $this->whenCounted('unpaidInvoices'),
             'active_enrollments' => $this->whenLoaded('enrollments', function () {
                 return $this->enrollments->where('status', 'active')->values();
             }),

@@ -1,34 +1,38 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { getInvoices } from "@/api/finance";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { formatDH } from "@/utils/currency";
 import { ArrowLeft, FileText, Search } from "lucide-react";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 export function InvoicesListPage() {
   const { t } = useTranslation("common");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(15);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   const { data, isLoading } = useQuery({
-    queryKey: ["invoices"],
-    queryFn: () => getInvoices(),
+    queryKey: ["invoices", page, perPage, debouncedSearch],
+    queryFn: () => getInvoices({ page, per_page: perPage, search: debouncedSearch }),
+    placeholderData: keepPreviousData,
   });
 
-  const [searchQuery, setSearchQuery] = useState("");
   const invoices = data?.data || [];
-
-  const filteredInvoices = useMemo(() => {
-    if (!searchQuery.trim()) return invoices;
-    const q = searchQuery.toLowerCase().trim();
-    return invoices.filter((inv: any) => {
-      const studentName = `${inv.student?.first_name || ""} ${inv.student?.last_name || ""}`.toLowerCase();
-      const idStr = `#${inv.id}`;
-      const periodStr = `${inv.month}/${inv.year}`;
-      const statusStr = inv.status?.toLowerCase() || "";
-      return idStr.includes(q) || studentName.includes(q) || periodStr.includes(q) || statusStr.includes(q) || String(inv.id).includes(q);
-    });
-  }, [invoices, searchQuery]);
+  const meta = data?.meta || null;
 
   return (
     <div className="p-6 space-y-6">
@@ -52,7 +56,7 @@ export function InvoicesListPage() {
 
       <div className="bg-white p-6 border rounded-md shadow-sm dark:bg-slate-900">
         {isLoading ? (
-          <div>Loading...</div>
+          <TableSkeleton columns={8} rows={8} headers={["Invoice ID", "Student", "Month/Year", "Total", "Paid", "Balance Due", "Status", "Action"]} />
         ) : (
           <Table>
             <TableHeader>
@@ -68,7 +72,7 @@ export function InvoicesListPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredInvoices.map((inv) => (
+              {invoices.map((inv) => (
                 <TableRow key={inv.id}>
                   <TableCell>#{inv.id}</TableCell>
                   <TableCell>{inv.student?.first_name} {inv.student?.last_name}</TableCell>
@@ -96,7 +100,7 @@ export function InvoicesListPage() {
                   </TableCell>
                 </TableRow>
               ))}
-              {filteredInvoices.length === 0 && (
+              {invoices.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={8} className="h-48 text-center">
                     <div className="flex flex-col items-center justify-center text-gray-500">
@@ -112,6 +116,15 @@ export function InvoicesListPage() {
             </TableBody>
           </Table>
         )}
+        <PaginationControls
+          meta={meta}
+          onPageChange={(newPage) => setPage(newPage)}
+          onPerPageChange={(newPerPage) => {
+            setPerPage(newPerPage);
+            setPage(1);
+          }}
+          isLoading={isLoading}
+        />
       </div>
     </div>
   );

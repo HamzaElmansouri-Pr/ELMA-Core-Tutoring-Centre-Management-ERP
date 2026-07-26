@@ -34,17 +34,10 @@ class DashboardController extends Controller
 
         $todayStr = strtolower(now()->englishDayOfWeek);
         
-        $activeClasses = SchoolClass::where('is_active', true)->get();
-        $sessionsToday = 0;
-        foreach ($activeClasses as $class) {
-            if ($class->schedule_info && is_array($class->schedule_info)) {
-                foreach ($class->schedule_info as $slot) {
-                    if (strtolower($slot['day']) === $todayStr) {
-                        $sessionsToday++;
-                    }
-                }
-            }
-        }
+        $sessionsToday = \App\Models\ClassSession::whereRaw('LOWER(day_of_week) = ?', [$todayStr])
+            ->whereHas('schoolClass', function ($q) {
+                $q->where('is_active', true);
+            })->count();
 
         return response()->json([
             'data' => [

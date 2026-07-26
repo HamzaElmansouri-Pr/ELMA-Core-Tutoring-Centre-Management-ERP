@@ -15,6 +15,16 @@ export const getTeachers = async (): Promise<Teacher[]> => {
   return response.data.data;
 };
 
+export const getTeachersPaginated = async (params?: { search?: string; page?: number; per_page?: number }): Promise<{ data: Teacher[]; meta: any }> => {
+  const response = await api.get('/api/teachers', { params });
+  return response.data;
+};
+
+export const getTeachersAll = async (): Promise<Teacher[]> => {
+  const response = await api.get('/api/teachers/all');
+  return response.data.data;
+};
+
 export const createTeacher = async (data: Omit<Teacher, 'id'>): Promise<Teacher> => {
   const response = await api.post('/api/teachers', data);
   return response.data.data;

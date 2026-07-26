@@ -1,13 +1,14 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { getStudents, type Student, deleteStudent } from "@/api/students";
+import { getStudentsPaginated, type Student, deleteStudent } from "@/api/students";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 import { StudentFormDialog } from "@/components/students/StudentFormDialog";
 import { SmartEnrollmentWizard } from "@/components/students/SmartEnrollmentWizard";
 import { Button } from "@/components/ui/button";
@@ -31,23 +32,26 @@ export function StudentsListPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(15);
 
-  const { data: students = [], refetch, isLoading } = useQuery({
-    queryKey: ["students"],
-    queryFn: getStudents,
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const { data: response, refetch, isLoading } = useQuery({
+    queryKey: ["studentsPaginated", page, perPage, debouncedSearch],
+    queryFn: () => getStudentsPaginated({ page, per_page: perPage, search: debouncedSearch }),
+    placeholderData: keepPreviousData,
   });
 
-  const filteredStudents = useMemo(() => {
-    if (!searchQuery.trim()) return students;
-    const q = searchQuery.toLowerCase().trim();
-    return students.filter(s => 
-      s.first_name?.toLowerCase().includes(q) ||
-      s.last_name?.toLowerCase().includes(q) ||
-      s.parent_phone?.toLowerCase().includes(q) ||
-      `${s.first_name} ${s.last_name}`.toLowerCase().includes(q) ||
-      `${s.last_name} ${s.first_name}`.toLowerCase().includes(q)
-    );
-  }, [students, searchQuery]);
+  const students = response?.data || [];
+  const meta = response?.meta || null;
 
   const handleEdit = (student: Student) => {
     setSelectedStudent(student);
@@ -65,7 +69,7 @@ export function StudentsListPage() {
     setIsWizardOpen(true);
   };
 
-  const columns = [
+  const columns = useMemo(() => [
     columnHelper.accessor((row) => `${row.first_name} ${row.last_name}`, {
       id: "name",
       header: t("name"),
@@ -101,10 +105,10 @@ export function StudentsListPage() {
         </div>
       ),
     }),
-  ];
+  ], [t, students]);
 
   const table = useReactTable({
-    data: filteredStudents,
+    data: students,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
@@ -150,11 +154,15 @@ export function StudentsListPage() {
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="text-center py-10">
-                  Loading...
-                </TableCell>
-              </TableRow>
+              Array.from({ length: 8 }).map((_, idx) => (
+                <TableRow key={idx}>
+                  {Array.from({ length: columns.length }).map((_, cIdx) => (
+                    <TableCell key={cIdx} className="py-4">
+                      <div className={`h-4 bg-gray-100 dark:bg-gray-800 rounded animate-pulse ${cIdx === 0 ? 'w-36' : cIdx === 1 ? 'w-28' : 'w-20'}`} />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
             ) : table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
@@ -180,6 +188,15 @@ export function StudentsListPage() {
             )}
           </TableBody>
         </Table>
+        <PaginationControls
+          meta={meta}
+          onPageChange={(newPage) => setPage(newPage)}
+          onPerPageChange={(newPerPage) => {
+            setPerPage(newPerPage);
+            setPage(1);
+          }}
+          isLoading={isLoading}
+        />
       </div>
 
       {isEditDialogOpen && (

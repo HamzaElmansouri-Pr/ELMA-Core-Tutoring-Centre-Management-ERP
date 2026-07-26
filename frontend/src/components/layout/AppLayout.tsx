@@ -6,6 +6,19 @@ import LanguageSwitcher from '../LanguageSwitcher';
 
 import { ModeToggle } from '../ModeToggle';
 
+const PageSkeleton = () => (
+  <div className="space-y-6 animate-pulse p-2">
+    <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded-lg w-48"></div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="h-28 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+      <div className="h-28 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+      <div className="h-28 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+      <div className="h-28 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+    </div>
+    <div className="h-96 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+  </div>
+);
+
 const AppLayout: React.FC = () => {
   const { t } = useTranslation('common');
   const { user, logout } = useAuthStore();
@@ -55,7 +68,9 @@ const AppLayout: React.FC = () => {
 
         {/* Page Content */}
         <main className="flex-1 p-6 overflow-auto">
-          <Outlet />
+          <React.Suspense fallback={<PageSkeleton />}>
+            <Outlet />
+          </React.Suspense>
         </main>
       </div>
     </div>
