@@ -29,15 +29,13 @@ class SubjectTest extends TestCase
     {
         $response = $this->postJson('/api/subjects', [
             'name' => 'Math',
-            'description' => 'Advanced Math',
-            'default_price_centimes' => 30000,
+            'description' => 'Math classes',
         ]);
 
         $response->assertStatus(201)
-            ->assertJsonPath('data.name', 'Math')
-            ->assertJsonPath('data.default_price_centimes', 30000);
-            
-        $this->assertDatabaseHas('subjects', ['name' => 'Math', 'default_price_centimes' => 30000]);
+            ->assertJsonPath('data.name', 'Math');
+
+        $this->assertDatabaseHas('subjects', ['name' => 'Math']);
     }
 
     public function test_can_update_subject()

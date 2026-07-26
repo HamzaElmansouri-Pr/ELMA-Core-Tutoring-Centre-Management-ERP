@@ -21,6 +21,8 @@ class Invoice extends Model
         'year',
         'total_amount_centimes',
         'paid_amount_centimes',
+        'discount_centimes',
+        'discount_reason',
         'status',
     ];
 
@@ -28,7 +30,7 @@ class Invoice extends Model
 
     public function getBalanceDueCentimesAttribute()
     {
-        return $this->total_amount_centimes - $this->paid_amount_centimes;
+        return $this->total_amount_centimes - $this->discount_centimes - $this->paid_amount_centimes;
     }
 
     public function getActivitylogOptions(): LogOptions

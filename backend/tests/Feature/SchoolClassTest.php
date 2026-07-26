@@ -29,13 +29,11 @@ class SchoolClassTest extends TestCase
             'name' => 'Math 101',
             'subject_id' => $subject->id,
             'teacher_id' => $teacher->id,
-            'schedule_info' => [
-                ['day' => 'monday', 'start' => '14:00', 'end' => '16:00'],
-            ],
+            'price_centimes' => 30000,
         ]);
 
         $response->assertStatus(201)->assertJsonPath('data.name', 'Math 101');
-        $this->assertDatabaseHas('school_classes', ['name' => 'Math 101', 'subject_id' => $subject->id]);
+        $this->assertDatabaseHas('school_classes', ['name' => 'Math 101', 'subject_id' => $subject->id, 'price_centimes' => 30000]);
     }
 
     public function test_validation_fails_for_soft_deleted_teacher()
@@ -48,28 +46,9 @@ class SchoolClassTest extends TestCase
             'name' => 'Math 101',
             'subject_id' => $subject->id,
             'teacher_id' => $teacher->id,
-            'schedule_info' => [
-                ['day' => 'monday', 'start' => '14:00', 'end' => '16:00'],
-            ],
+            'price_centimes' => 30000,
         ]);
 
         $response->assertStatus(422)->assertJsonValidationErrors(['teacher_id']);
-    }
-
-    public function test_validation_fails_for_invalid_json_schedule()
-    {
-        $subject = Subject::factory()->create();
-        $teacher = Teacher::factory()->create();
-
-        $response = $this->postJson('/api/school-classes', [
-            'name' => 'Math 101',
-            'subject_id' => $subject->id,
-            'teacher_id' => $teacher->id,
-            'schedule_info' => [
-                ['day' => 'monday', 'start' => '16:00', 'end' => '14:00'], // invalid: end before start
-            ],
-        ]);
-
-        $response->assertStatus(422)->assertJsonValidationErrors(['schedule_info.0.end']);
     }
 }

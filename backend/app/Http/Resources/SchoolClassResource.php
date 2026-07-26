@@ -19,11 +19,12 @@ class SchoolClassResource extends JsonResource
             'name' => $this->name,
             'subject_id' => $this->subject_id,
             'teacher_id' => $this->teacher_id,
-            'schedule_info' => $this->schedule_info,
+            'price_centimes' => $this->price_centimes,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'subject' => new \App\Http\Resources\SubjectResource($this->whenLoaded('subject')),
             'teacher' => new \App\Http\Resources\TeacherResource($this->whenLoaded('teacher')),
+            'sessions' => $this->whenLoaded('sessions'),
             'enrollments_count' => $this->whenCounted('enrollments'),
         ];
     }

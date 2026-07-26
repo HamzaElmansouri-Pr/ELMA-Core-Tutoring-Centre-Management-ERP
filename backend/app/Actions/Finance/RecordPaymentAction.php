@@ -10,16 +10,25 @@ use Exception;
 
 class RecordPaymentAction
 {
-    public function execute(Invoice $invoice, int $amountCentimes, string $paymentMethod = 'cash'): Payment
+    public function execute(Invoice $invoice, int $amountCentimes, string $paymentMethod = 'cash', ?int $discountCentimes = null, ?string $discountReason = null): Payment
     {
         if ($amountCentimes <= 0) {
-            throw new Exception("Payment amount must be greater than zero.");
+            throw new \InvalidArgumentException("Payment amount must be greater than zero.");
         }
 
-        $balanceDue = $invoice->total_amount_centimes - $invoice->paid_amount_centimes;
+        // Apply discount if provided
+        if ($discountCentimes !== null) {
+            $invoice->discount_centimes = $discountCentimes;
+            if ($discountReason !== null) {
+                $invoice->discount_reason = $discountReason;
+            }
+            $invoice->save();
+        }
+
+        $balanceDue = $invoice->total_amount_centimes - $invoice->discount_centimes - $invoice->paid_amount_centimes;
 
         if ($amountCentimes > $balanceDue) {
-            throw new Exception("Payment amount cannot exceed the balance due.");
+            throw new \InvalidArgumentException("Payment amount cannot exceed the balance due.");
         }
 
         return DB::transaction(function () use ($invoice, $amountCentimes, $paymentMethod) {
@@ -34,7 +43,8 @@ class RecordPaymentAction
             $invoice->paid_amount_centimes += $amountCentimes;
             
             // Set invoice status
-            if ($invoice->paid_amount_centimes >= $invoice->total_amount_centimes) {
+            $newBalanceDue = $invoice->total_amount_centimes - $invoice->discount_centimes - $invoice->paid_amount_centimes;
+            if ($newBalanceDue <= 0) {
                 $invoice->status = 'paid';
             } else {
                 $invoice->status = 'partial';

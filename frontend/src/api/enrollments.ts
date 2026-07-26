@@ -1,5 +1,4 @@
 import api from '@/lib/axios';
-import { type Student } from './students';
 import { type SchoolClass } from './classes';
 
 export interface Enrollment {

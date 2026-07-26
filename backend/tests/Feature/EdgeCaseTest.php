@@ -32,7 +32,7 @@ class EdgeCaseTest extends TestCase
     public function test_invoice_generation_ignores_students_with_no_enrollments(): void
     {
         // Create a student with no enrollments at all
-        Student::factory()->create(['name' => 'Loner Student']);
+        Student::factory()->create(['first_name' => 'Loner', 'last_name' => 'Student']);
 
         $action = new GenerateMonthlyInvoicesAction();
         $result = $action->execute(now()->month, now()->year);
@@ -46,11 +46,12 @@ class EdgeCaseTest extends TestCase
      */
     public function test_ending_enrollment_does_not_alter_existing_invoice(): void
     {
-        $subject = Subject::factory()->create(['default_price_centimes' => 30000]);
+        $subject = Subject::factory()->create();
         $teacher = Teacher::factory()->create();
         $class = SchoolClass::factory()->create([
             'subject_id' => $subject->id,
             'teacher_id' => $teacher->id,
+            'price_centimes' => 30000,
             'is_active' => true,
         ]);
         $student = Student::factory()->create();
@@ -87,9 +88,10 @@ class EdgeCaseTest extends TestCase
     {
         $teacher = Teacher::factory()->create();
         $subject = Subject::factory()->create();
-        SchoolClass::factory()->create([
+        $schoolClass = SchoolClass::factory()->create([
             'teacher_id' => $teacher->id,
             'subject_id' => $subject->id,
+            'price_centimes' => 30000,
             'is_active' => true,
         ]);
 
@@ -124,11 +126,12 @@ class EdgeCaseTest extends TestCase
      */
     public function test_idempotent_invoice_generation(): void
     {
-        $subject = Subject::factory()->create(['default_price_centimes' => 50000]);
+        $subject = Subject::factory()->create();
         $teacher = Teacher::factory()->create();
         $class = SchoolClass::factory()->create([
             'subject_id' => $subject->id,
             'teacher_id' => $teacher->id,
+            'price_centimes' => 50000,
             'is_active' => true,
         ]);
         $student = Student::factory()->create();

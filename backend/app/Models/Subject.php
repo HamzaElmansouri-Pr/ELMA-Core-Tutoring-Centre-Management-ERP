@@ -16,7 +16,6 @@ class Subject extends Model
     protected $fillable = [
         'name',
         'description',
-        'default_price_centimes',
     ];
 
     public function getActivitylogOptions(): LogOptions

@@ -20,6 +20,8 @@ class TeacherFactory extends Factory
         return [
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
+            'phone' => fake()->phoneNumber(),
+            'whatsapp_phone' => fake()->phoneNumber(),
             'commission_percentage' => fake()->randomFloat(2, 0, 100),
             'is_active' => fake()->boolean(80),
         ];

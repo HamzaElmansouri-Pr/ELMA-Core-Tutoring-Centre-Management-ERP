@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -6,7 +6,7 @@ import * as z from "zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Search, Loader2, UserPlus } from "lucide-react";
 
-import { type Student, searchStudents, createStudent, bulkEnrollStudent } from "@/api/students";
+import { type Student, getStudents, createStudent, bulkEnrollStudent } from "@/api/students";
 import { getClasses, type SchoolClass } from "@/api/classes";
 
 import {
@@ -40,22 +40,28 @@ export function SmartEnrollmentWizard({ isOpen, onClose, onSuccess }: SmartEnrol
   // Wizard State
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [selectedClasses, setSelectedClasses] = useState<number[]>([]);
 
-  // Debounce search
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedQuery(searchQuery), 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-
   // Queries
-  const { data: searchResults, isLoading: isSearching } = useQuery({
-    queryKey: ["students", "search", debouncedQuery],
-    queryFn: () => searchStudents(debouncedQuery),
-    enabled: debouncedQuery.length > 1,
+  const { data: allStudents = [], isLoading: isSearching } = useQuery({
+    queryKey: ["students"],
+    queryFn: getStudents,
   });
+
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return allStudents.slice(0, 10);
+    }
+    const q = searchQuery.toLowerCase().trim();
+    return allStudents.filter(s => 
+      s.first_name?.toLowerCase().includes(q) ||
+      s.last_name?.toLowerCase().includes(q) ||
+      s.parent_phone?.toLowerCase().includes(q) ||
+      `${s.first_name} ${s.last_name}`.toLowerCase().includes(q) ||
+      `${s.last_name} ${s.first_name}`.toLowerCase().includes(q)
+    ).slice(0, 15);
+  }, [allStudents, searchQuery]);
 
   const { data: classes } = useQuery({
     queryKey: ["classes"],
@@ -82,7 +88,6 @@ export function SmartEnrollmentWizard({ isOpen, onClose, onSuccess }: SmartEnrol
     if (!isOpen) {
       setStep(1);
       setSearchQuery("");
-      setDebouncedQuery("");
       setSelectedStudent(null);
       setSelectedClasses([]);
       reset();
@@ -171,7 +176,7 @@ export function SmartEnrollmentWizard({ isOpen, onClose, onSuccess }: SmartEnrol
             <div className="border rounded-md max-h-64 overflow-y-auto">
               {isSearching ? (
                 <div className="p-4 text-center text-gray-500 flex items-center justify-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" /> Searching...
+                  <Loader2 className="w-4 h-4 animate-spin" /> Loading students...
                 </div>
               ) : searchResults && searchResults.length > 0 ? (
                 <ul className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -189,13 +194,9 @@ export function SmartEnrollmentWizard({ isOpen, onClose, onSuccess }: SmartEnrol
                     </li>
                   ))}
                 </ul>
-              ) : debouncedQuery.length > 1 ? (
-                <div className="p-8 text-center text-gray-500">
-                  No students found.
-                </div>
               ) : (
-                <div className="p-8 text-center text-gray-400 text-sm">
-                  Type at least 2 characters to search the Global Student DB.
+                <div className="p-8 text-center text-gray-500">
+                  {searchQuery ? `No students matching "${searchQuery}"` : "No students in the database yet."}
                 </div>
               )}
             </div>

@@ -8,7 +8,7 @@ import { ArrowRight, MessageCircleWarning } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 export function DashboardPage() {
-  const { t, i18n } = useTranslation("common");
+  const { t } = useTranslation("common");
   
   const { data: kpis } = useQuery({ queryKey: ["kpis"], queryFn: getDashboardKPIs });
   const { data: alerts } = useQuery({ queryKey: ["unpaidAlerts"], queryFn: getUnpaidAlerts });

@@ -25,7 +25,6 @@ class UpdateSubjectRequest extends FormRequest
         return [
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'default_price_centimes' => ['sometimes', 'required', 'integer', 'min:0'],
         ];
     }
 }

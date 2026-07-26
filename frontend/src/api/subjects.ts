@@ -4,7 +4,6 @@ export interface Subject {
   id: number;
   name: string;
   description: string | null;
-  default_price_centimes: number;
 }
 
 export const getSubjects = async (): Promise<Subject[]> => {

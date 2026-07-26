@@ -24,6 +24,8 @@ export interface Invoice {
   year: number;
   total_amount_centimes: number;
   paid_amount_centimes: number;
+  discount_centimes: number;
+  discount_reason: string | null;
   status: 'unpaid' | 'partial' | 'paid';
   balance_due_centimes: number;
   created_at: string;

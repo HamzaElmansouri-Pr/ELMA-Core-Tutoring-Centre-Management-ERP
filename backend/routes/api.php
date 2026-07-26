@@ -24,6 +24,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('invoices/generate', [\App\Http\Controllers\Api\InvoiceController::class, 'generate']);
     Route::apiResource('invoices', \App\Http\Controllers\Api\InvoiceController::class)->only(['index', 'show']);
     Route::post('invoices/{invoice}/payments', [\App\Http\Controllers\Api\PaymentController::class, 'store']);
+    Route::get('/students/{student}/invoices', [\App\Http\Controllers\Api\PaymentController::class, 'getStudentInvoices']);
+    Route::get('/payments', [\App\Http\Controllers\Api\PaymentController::class, 'index']);
+    Route::post('/payments', [\App\Http\Controllers\Api\PaymentController::class, 'store']);
+    Route::get('/payments/{payment}/receipt', [\App\Http\Controllers\Api\PaymentController::class, 'downloadReceipt']);
 
     Route::get('payroll', [\App\Http\Controllers\Api\PayrollController::class, 'index']);
     Route::post('payroll/calculate', [\App\Http\Controllers\Api\PayrollController::class, 'calculate']);

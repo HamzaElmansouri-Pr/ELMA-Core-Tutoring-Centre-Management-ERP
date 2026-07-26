@@ -26,10 +26,7 @@ class UpdateSchoolClassRequest extends FormRequest
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'subject_id' => ['sometimes', 'required', 'exists:subjects,id,deleted_at,NULL'],
             'teacher_id' => ['sometimes', 'required', 'exists:teachers,id,deleted_at,NULL'],
-            'schedule_info' => ['sometimes', 'required', 'array'],
-            'schedule_info.*.day' => ['required_with:schedule_info', 'string'],
-            'schedule_info.*.start' => ['required_with:schedule_info', 'string', 'date_format:H:i'],
-            'schedule_info.*.end' => ['required_with:schedule_info', 'string', 'date_format:H:i', 'after:schedule_info.*.start'],
+            'price_centimes' => ['sometimes', 'required', 'integer', 'min:0'],
         ];
     }
 }

@@ -18,7 +18,6 @@ class SubjectResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
-            'default_price_centimes' => $this->default_price_centimes,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

@@ -18,9 +18,8 @@ class SubjectFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->word(),
+            'name' => fake()->unique()->word(),
             'description' => fake()->sentence(),
-            'default_price_centimes' => fake()->numberBetween(10000, 50000),
         ];
     }
 }

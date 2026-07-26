@@ -28,8 +28,16 @@ class AuthController extends Controller
     {
         Auth::guard('web')->logout();
         
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        if ($request->hasSession()) {
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
+
+        if (method_exists(Auth::guard('sanctum'), 'forgetUser')) {
+            Auth::guard('sanctum')->forgetUser();
+        } elseif (method_exists(Auth::guard('sanctum'), 'setUser')) {
+            Auth::guard('sanctum')->setUser(null);
+        }
 
         return response()->json(['message' => 'Logged out successfully']);
     }

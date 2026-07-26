@@ -25,7 +25,6 @@ class StoreSubjectRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'default_price_centimes' => ['required', 'integer', 'min:0'],
         ];
     }
 }

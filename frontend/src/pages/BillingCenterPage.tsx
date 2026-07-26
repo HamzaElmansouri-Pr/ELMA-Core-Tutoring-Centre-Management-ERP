@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getInvoices, generateInvoices } from "@/api/finance";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { formatDH } from "@/utils/currency";
-import { FileText, PlusCircle, AlertTriangle } from "lucide-react";
+import { FileText, PlusCircle, AlertTriangle, Search } from "lucide-react";
 
 export function BillingCenterPage() {
   const { t } = useTranslation("common");
@@ -33,20 +34,43 @@ export function BillingCenterPage() {
     }
   });
 
+  const [searchQuery, setSearchQuery] = useState("");
   const unpaidInvoices = data?.data || [];
+
+  const filteredInvoices = useMemo(() => {
+    if (!searchQuery.trim()) return unpaidInvoices;
+    const q = searchQuery.toLowerCase().trim();
+    return unpaidInvoices.filter((inv: any) => {
+      const studentName = `${inv.student?.first_name || ""} ${inv.student?.last_name || ""}`.toLowerCase();
+      const idStr = `#${inv.id}`;
+      const periodStr = `${inv.month}/${inv.year}`;
+      return idStr.includes(q) || studentName.includes(q) || periodStr.includes(q) || String(inv.id).includes(q);
+    });
+  }, [unpaidInvoices, searchQuery]);
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-semibold">{t('billing_center', 'Billing Center')}</h1>
-        <div className="flex gap-4">
-          <Button variant="outline" asChild>
-            <Link to="/invoices">{t('view_all_invoices', 'View All Invoices')}</Link>
-          </Button>
-          <Button onClick={() => setIsGenerateOpen(true)}>
-            <PlusCircle className="w-4 h-4 me-2" />
-            {t('generate_invoices', 'Generate Invoices')}
-          </Button>
+        <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto">
+          <div className="relative flex-1 sm:w-64 sm:flex-initial">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search invoice #, student..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 w-full bg-white dark:bg-slate-900"
+            />
+          </div>
+          <div className="flex gap-4">
+            <Button variant="outline" asChild>
+              <Link to="/invoices">{t('view_all_invoices', 'View All Invoices')}</Link>
+            </Button>
+            <Button onClick={() => setIsGenerateOpen(true)}>
+              <PlusCircle className="w-4 h-4 me-2" />
+              {t('generate_invoices', 'Generate Invoices')}
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -70,7 +94,7 @@ export function BillingCenterPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {unpaidInvoices.map((inv) => (
+              {filteredInvoices.map((inv) => (
                 <TableRow key={inv.id}>
                   <TableCell>#{inv.id}</TableCell>
                   <TableCell>{inv.student?.first_name} {inv.student?.last_name}</TableCell>
@@ -85,7 +109,7 @@ export function BillingCenterPage() {
                   </TableCell>
                 </TableRow>
               ))}
-              {unpaidInvoices.length === 0 && (
+              {filteredInvoices.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-4">No unpaid invoices found.</TableCell>
                 </TableRow>

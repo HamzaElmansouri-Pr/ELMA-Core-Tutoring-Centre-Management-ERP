@@ -1,12 +1,13 @@
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { getInvoices } from "@/api/finance";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDH } from "@/utils/currency";
-import { ArrowLeft, FileText } from "lucide-react";
-
+import { ArrowLeft, FileText, Search } from "lucide-react";
 export function InvoicesListPage() {
   const { t } = useTranslation("common");
   const { data, isLoading } = useQuery({
@@ -14,15 +15,39 @@ export function InvoicesListPage() {
     queryFn: () => getInvoices(),
   });
 
+  const [searchQuery, setSearchQuery] = useState("");
   const invoices = data?.data || [];
+
+  const filteredInvoices = useMemo(() => {
+    if (!searchQuery.trim()) return invoices;
+    const q = searchQuery.toLowerCase().trim();
+    return invoices.filter((inv: any) => {
+      const studentName = `${inv.student?.first_name || ""} ${inv.student?.last_name || ""}`.toLowerCase();
+      const idStr = `#${inv.id}`;
+      const periodStr = `${inv.month}/${inv.year}`;
+      const statusStr = inv.status?.toLowerCase() || "";
+      return idStr.includes(q) || studentName.includes(q) || periodStr.includes(q) || statusStr.includes(q) || String(inv.id).includes(q);
+    });
+  }, [invoices, searchQuery]);
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild>
-          <Link to="/finance"><ArrowLeft className="w-5 h-5" /></Link>
-        </Button>
-        <h1 className="text-2xl font-semibold">{t("sidebar_invoices", "Invoices")}</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" asChild>
+            <Link to="/finance"><ArrowLeft className="w-5 h-5" /></Link>
+          </Button>
+          <h1 className="text-2xl font-semibold">{t("sidebar_invoices", "Invoices")}</h1>
+        </div>
+        <div className="relative w-full sm:w-72">
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Search invoice #, student, period..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9 w-full bg-white dark:bg-slate-900"
+          />
+        </div>
       </div>
 
       <div className="bg-white p-6 border rounded-md shadow-sm dark:bg-slate-900">
@@ -43,7 +68,7 @@ export function InvoicesListPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {invoices.map((inv) => (
+              {filteredInvoices.map((inv) => (
                 <TableRow key={inv.id}>
                   <TableCell>#{inv.id}</TableCell>
                   <TableCell>{inv.student?.first_name} {inv.student?.last_name}</TableCell>
@@ -71,7 +96,7 @@ export function InvoicesListPage() {
                   </TableCell>
                 </TableRow>
               ))}
-              {invoices.length === 0 && (
+              {filteredInvoices.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={8} className="h-48 text-center">
                     <div className="flex flex-col items-center justify-center text-gray-500">

@@ -45,7 +45,7 @@ export const ReceiptTemplate = forwardRef<HTMLDivElement, ReceiptTemplateProps>(
           </tr>
         </thead>
         <tbody>
-          {invoice.items?.map((item, index) => (
+          {invoice.items?.map((item) => (
             <tr key={item.id} className="border-b border-gray-100">
               <td className="py-3 text-sm">
                 <span className="font-medium">{item.school_class.subject.name}</span>

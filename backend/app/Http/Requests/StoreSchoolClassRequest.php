@@ -21,10 +21,7 @@ class StoreSchoolClassRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'subject_id' => ['required', 'exists:subjects,id,deleted_at,NULL'],
             'teacher_id' => ['required', 'exists:teachers,id,deleted_at,NULL'],
-            'schedule_info' => ['required', 'array'],
-            'schedule_info.*.day' => ['required', 'string'],
-            'schedule_info.*.start' => ['required', 'string', 'date_format:H:i'],
-            'schedule_info.*.end' => ['required', 'string', 'date_format:H:i', 'after:schedule_info.*.start'],
+            'price_centimes' => ['required', 'integer', 'min:0'],
         ];
     }
 }

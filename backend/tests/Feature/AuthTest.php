@@ -42,16 +42,9 @@ class AuthTest extends TestCase
 
     public function test_user_can_logout()
     {
-        $user = User::factory()->create([
-            'password' => bcrypt('password123'),
-        ]);
+        $user = User::factory()->create();
         
-        $this->withHeaders(['Referer' => 'http://localhost:5173'])->postJson('/api/login', [
-            'email' => $user->email,
-            'password' => 'password123',
-        ]);
-        
-        $response = $this->withHeaders(['Referer' => 'http://localhost:5173'])->postJson('/api/logout');
+        $response = $this->actingAs($user)->withHeaders(['Referer' => 'http://localhost:5173'])->postJson('/api/logout');
 
         $response->assertStatus(200);
         $this->assertGuest();

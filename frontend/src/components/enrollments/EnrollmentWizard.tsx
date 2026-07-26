@@ -82,7 +82,7 @@ export function EnrollmentWizard({ studentId, isOpen, onClose, onSuccess }: Enro
                           <Check
                             className={cn("mr-2 h-4 w-4", c.id === selectedClassId ? "opacity-100" : "opacity-0")}
                           />
-                          {c.name} - {c.subject?.name} ({formatDH(c.subject?.default_price_centimes || 0)})
+                          {c.name} - {c.subject?.name} ({formatDH(c.price_centimes || 0)})
                         </CommandItem>
                       ))}
                     </CommandGroup>
@@ -96,7 +96,7 @@ export function EnrollmentWizard({ studentId, isOpen, onClose, onSuccess }: Enro
             <div className="bg-slate-50 p-3 rounded text-sm space-y-1 dark:bg-slate-800">
               <p><strong>Subject:</strong> {selectedClass.subject?.name}</p>
               <p><strong>Teacher:</strong> {selectedClass.teacher?.name}</p>
-              <p><strong>Price:</strong> {formatDH(selectedClass.subject?.default_price_centimes || 0)} / month</p>
+              <p><strong>Price:</strong> {formatDH(selectedClass.price_centimes || 0)} / month</p>
             </div>
           )}
         </div>

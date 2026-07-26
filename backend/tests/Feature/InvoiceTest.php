@@ -26,8 +26,8 @@ class InvoiceTest extends TestCase
     public function test_invoice_generation_is_idempotent()
     {
         $student = Student::factory()->create();
-        $subject = Subject::factory()->create(['default_price_centimes' => 50000]); // 500 DH
-        $schoolClass = SchoolClass::factory()->create(['subject_id' => $subject->id]);
+        $subject = Subject::factory()->create();
+        $schoolClass = SchoolClass::factory()->create(['subject_id' => $subject->id, 'price_centimes' => 50000]); // 500 DH
 
         Enrollment::create([
             'student_id' => $student->id,

@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getPayrollSummaries, calculatePayroll, markPayrollPaid } from "@/api/payroll";
 import type { TeacherPayrollSummary, PayrollBreakdownItem } from "@/api/payroll";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDH } from "@/utils/currency";
-import { Calculator, Lock, Eye, AlertTriangle } from "lucide-react";
+import { Calculator, Lock, Eye, AlertTriangle, Search } from "lucide-react";
 import { PayrollBreakdownDialog } from "@/components/finance/PayrollBreakdownDialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
@@ -26,6 +27,17 @@ export function PayrollPage() {
     queryKey: ["payroll", month, year],
     queryFn: () => getPayrollSummaries(month, year),
   });
+
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredSummaries = useMemo(() => {
+    if (!searchQuery.trim()) return summaries;
+    const q = searchQuery.toLowerCase().trim();
+    return summaries.filter((s: TeacherPayrollSummary) => 
+      s.teacher_name?.toLowerCase().includes(q) ||
+      s.status?.toLowerCase().includes(q)
+    );
+  }, [summaries, searchQuery]);
 
   const calcMutation = useMutation({
     mutationFn: (teacher_id: number) => calculatePayroll(teacher_id, month, year),
@@ -51,16 +63,27 @@ export function PayrollPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-semibold">Teacher Payroll</h1>
-        <div className="flex gap-4">
-          <div>
-            <label className="text-sm font-medium me-2">Month:</label>
-            <input type="number" min={1} max={12} className="border rounded px-2 py-1 w-20" value={month} onChange={(e) => setMonth(Number(e.target.value))} />
+        <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto">
+          <div className="relative flex-1 sm:w-64 sm:flex-initial">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search teacher, status..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 w-full bg-white dark:bg-slate-900"
+            />
           </div>
-          <div>
-            <label className="text-sm font-medium me-2">Year:</label>
-            <input type="number" min={2000} className="border rounded px-2 py-1 w-24" value={year} onChange={(e) => setYear(Number(e.target.value))} />
+          <div className="flex gap-4">
+            <div>
+              <label className="text-sm font-medium me-2">Month:</label>
+              <input type="number" min={1} max={12} className="border rounded px-2 py-1 w-20 dark:bg-slate-900 dark:border-slate-700" value={month} onChange={(e) => setMonth(Number(e.target.value))} />
+            </div>
+            <div>
+              <label className="text-sm font-medium me-2">Year:</label>
+              <input type="number" min={2000} className="border rounded px-2 py-1 w-24 dark:bg-slate-900 dark:border-slate-700" value={year} onChange={(e) => setYear(Number(e.target.value))} />
+            </div>
           </div>
         </div>
       </div>
@@ -85,7 +108,7 @@ export function PayrollPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {summaries.map((summary) => (
+              {filteredSummaries.map((summary) => (
                 <TableRow key={summary.teacher_id}>
                   <TableCell className="font-medium">{summary.teacher_name}</TableCell>
                   <TableCell>{summary.commission_percentage}%</TableCell>
@@ -139,7 +162,7 @@ export function PayrollPage() {
                   </TableCell>
                 </TableRow>
               ))}
-              {summaries.length === 0 && (
+              {filteredSummaries.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-4">No teachers found.</TableCell>
                 </TableRow>

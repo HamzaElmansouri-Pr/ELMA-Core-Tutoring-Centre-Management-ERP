@@ -11,12 +11,10 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { toCentimes, fromCentimes } from "@/utils/currency";
 
 const subjectSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().or(z.literal("")).transform(e => e === "" ? null : e).nullable(),
-  price_dh: z.number().min(0, "Price must be positive"),
 });
 
 type SubjectFormValues = z.infer<typeof subjectSchema>;
@@ -45,7 +43,6 @@ export function SubjectFormDialog({
     defaultValues: {
       name: subject?.name || "",
       description: subject?.description || "",
-      price_dh: subject ? fromCentimes(subject.default_price_centimes) : 0,
     },
   });
 
@@ -54,7 +51,6 @@ export function SubjectFormDialog({
       const payload = {
         name: data.name,
         description: data.description,
-        default_price_centimes: toCentimes(data.price_dh),
       };
 
       if (subject) {
@@ -95,26 +91,12 @@ export function SubjectFormDialog({
             )}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">{t("default_price")} (DH)</label>
-            <Input
-              type="number"
-              step="0.01"
-              {...register("price_dh", { valueAsNumber: true })}
-            />
-            {errors.price_dh && (
-              <span className="text-sm text-red-500">
-                {errors.price_dh.message}
-              </span>
-            )}
-          </div>
-
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
+              {t("cancel")}
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              Save
+              {t("save")}
             </Button>
           </div>
         </form>

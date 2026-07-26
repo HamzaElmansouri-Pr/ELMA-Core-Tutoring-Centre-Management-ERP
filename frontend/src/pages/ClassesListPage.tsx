@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -10,7 +10,8 @@ import {
 import { getClasses, type SchoolClass, deleteClass } from "@/api/classes";
 import { ClassFormDialog } from "@/components/classes/ClassFormDialog";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Plus, Edit, Trash2, Search } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -19,6 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatDH } from "@/utils/currency";
 
 const columnHelper = createColumnHelper<SchoolClass>();
 
@@ -26,11 +28,22 @@ export function ClassesListPage() {
   const { t } = useTranslation("common");
   const [selectedClass, setSelectedClass] = useState<SchoolClass | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: classes = [], refetch, isLoading } = useQuery({
     queryKey: ["classes"],
     queryFn: getClasses,
   });
+
+  const filteredClasses = useMemo(() => {
+    if (!searchQuery.trim()) return classes;
+    const q = searchQuery.toLowerCase().trim();
+    return classes.filter(cls => 
+      cls.name?.toLowerCase().includes(q) ||
+      cls.subject?.name?.toLowerCase().includes(q) ||
+      cls.teacher?.name?.toLowerCase().includes(q)
+    );
+  }, [classes, searchQuery]);
 
   const handleEdit = (schoolClass: SchoolClass) => {
     setSelectedClass(schoolClass);
@@ -68,6 +81,10 @@ export function ClassesListPage() {
       header: t("students", "Students"),
       cell: (info) => info.getValue() ?? 0,
     }),
+    columnHelper.accessor("price_centimes", {
+      header: t("default_price", "Price"),
+      cell: (info) => formatDH(info.getValue()),
+    }),
     columnHelper.display({
       id: "actions",
       header: t("actions"),
@@ -85,19 +102,30 @@ export function ClassesListPage() {
   ];
 
   const table = useReactTable({
-    data: classes,
+    data: filteredClasses,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h1 className="text-2xl font-semibold">{t("sidebar_classes", "Classes")}</h1>
-        <Button onClick={handleAdd}>
-          <Plus className="w-4 h-4 me-2" />
-          {t("add_class", "Add Class")}
-        </Button>
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="relative w-full sm:w-72">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder={t("search_classes", "Search classes, subject, teacher...")}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 w-full bg-white dark:bg-slate-900"
+            />
+          </div>
+          <Button onClick={handleAdd} className="shrink-0">
+            <Plus className="w-4 h-4 me-2" />
+            {t("add_class", "Add Class")}
+          </Button>
+        </div>
       </div>
 
       <div className="border rounded-md bg-white dark:bg-slate-900 overflow-hidden">

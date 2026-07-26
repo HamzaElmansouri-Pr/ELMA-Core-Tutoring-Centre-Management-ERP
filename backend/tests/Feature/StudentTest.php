@@ -41,15 +41,17 @@ class StudentTest extends TestCase
             ->postJson('/api/students', $payload);
 
         $response->assertStatus(201)
-            ->assertJsonPath('data.name', 'Alice Student');
+            ->assertJsonPath('data.first_name', 'Alice')
+            ->assertJsonPath('data.last_name', 'Student');
 
-        $this->assertDatabaseHas('students', ['name' => 'Alice Student']);
+        $this->assertDatabaseHas('students', ['first_name' => 'Alice', 'last_name' => 'Student']);
     }
 
     public function test_can_update_student()
     {
         $student = Student::factory()->create([
-            'name' => 'Bob Student',
+            'first_name' => 'Bob',
+            'last_name' => 'Student',
             'parent_phone' => '0987654321'
         ]);
 
@@ -60,9 +62,10 @@ class StudentTest extends TestCase
             ]);
 
         $response->assertStatus(200)
-            ->assertJsonPath('data.name', 'Bob Smith');
+            ->assertJsonPath('data.first_name', 'Bob')
+            ->assertJsonPath('data.last_name', 'Smith');
 
-        $this->assertDatabaseHas('students', ['name' => 'Bob Smith', 'parent_phone' => '1112223333']);
+        $this->assertDatabaseHas('students', ['first_name' => 'Bob', 'last_name' => 'Smith', 'parent_phone' => '1112223333']);
     }
 
     public function test_can_soft_delete_student()

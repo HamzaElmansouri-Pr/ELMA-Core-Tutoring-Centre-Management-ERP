@@ -18,13 +18,11 @@ class SchoolClass extends Model
         'name',
         'subject_id',
         'teacher_id',
-        'classroom_id',
-        'schedule_info',
+        'price_centimes',
         'is_active',
     ];
 
     protected $casts = [
-        'schedule_info' => 'array',
         'is_active' => 'boolean',
     ];
 
@@ -45,9 +43,9 @@ class SchoolClass extends Model
         return $this->belongsTo(Teacher::class);
     }
 
-    public function classroom(): BelongsTo
+    public function sessions(): HasMany
     {
-        return $this->belongsTo(Classroom::class);
+        return $this->hasMany(ClassSession::class);
     }
 
     public function enrollments(): HasMany

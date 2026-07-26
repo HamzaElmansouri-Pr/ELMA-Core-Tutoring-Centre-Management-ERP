@@ -14,6 +14,7 @@ import { ClassesListPage } from './pages/ClassesListPage';
 import { BillingCenterPage } from './pages/BillingCenterPage';
 import { InvoicesListPage } from './pages/InvoicesListPage';
 import { InvoiceDetailPage } from './pages/InvoiceDetailPage';
+import { PaymentsPage } from './pages/PaymentsPage';
 import { PayrollPage } from './pages/PayrollPage';
 import { TimetablePage } from './pages/TimetablePage';
 import { SettingsPage } from './pages/SettingsPage';
@@ -59,6 +60,7 @@ export const router = createBrowserRouter([
                     { path: 'students', element: <StudentsListPage /> },
                     { path: 'students/:id', element: <StudentDetailPage /> },
                     { path: 'classes', element: <ClassesListPage /> },
+                    { path: 'payments', element: <PaymentsPage /> },
                     { path: 'timetable', element: <TimetablePage /> },
                     { path: 'finance', element: <BillingCenterPage /> },
                     { path: 'invoices', element: <InvoicesListPage /> },

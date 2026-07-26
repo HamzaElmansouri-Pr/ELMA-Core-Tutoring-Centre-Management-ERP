@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -10,7 +10,8 @@ import {
 import { getSubjects, type Subject, deleteSubject } from "@/api/subjects";
 import { SubjectFormDialog } from "@/components/subjects/SubjectFormDialog";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Plus, Edit, Trash2, Search } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -19,7 +20,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatDH } from "@/utils/currency";
 
 const columnHelper = createColumnHelper<Subject>();
 
@@ -27,11 +27,21 @@ export function SubjectsListPage() {
   const { t } = useTranslation("common");
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: subjects = [], refetch, isLoading } = useQuery({
     queryKey: ["subjects"],
     queryFn: getSubjects,
   });
+
+  const filteredSubjects = useMemo(() => {
+    if (!searchQuery.trim()) return subjects;
+    const q = searchQuery.toLowerCase().trim();
+    return subjects.filter(sub => 
+      sub.name?.toLowerCase().includes(q) ||
+      sub.description?.toLowerCase().includes(q)
+    );
+  }, [subjects, searchQuery]);
 
   const handleEdit = (subject: Subject) => {
     setSelectedSubject(subject);
@@ -59,10 +69,7 @@ export function SubjectsListPage() {
       header: t("description"),
       cell: (info) => info.getValue() || "-",
     }),
-    columnHelper.accessor("default_price_centimes", {
-      header: t("default_price"),
-      cell: (info) => formatDH(info.getValue()),
-    }),
+
     columnHelper.display({
       id: "actions",
       header: t("actions"),
@@ -80,19 +87,30 @@ export function SubjectsListPage() {
   ];
 
   const table = useReactTable({
-    data: subjects,
+    data: filteredSubjects,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h1 className="text-2xl font-semibold">{t("sidebar_subjects", "Subjects")}</h1>
-        <Button onClick={handleAdd}>
-          <Plus className="w-4 h-4 me-2" />
-          {t("add_subject")}
-        </Button>
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="relative w-full sm:w-72">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder={t("search_subjects", "Search subjects...")}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 w-full bg-white dark:bg-slate-900"
+            />
+          </div>
+          <Button onClick={handleAdd} className="shrink-0">
+            <Plus className="w-4 h-4 me-2" />
+            {t("add_subject")}
+          </Button>
+        </div>
       </div>
 
       <div className="border rounded-md bg-white dark:bg-slate-900 overflow-hidden">

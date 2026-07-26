@@ -18,12 +18,11 @@ class SchoolClassFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->word() . ' Class',
+            'name' => 'Class ' . fake()->word(),
             'subject_id' => \App\Models\Subject::factory(),
             'teacher_id' => \App\Models\Teacher::factory(),
-            'schedule_info' => [
-                ['day' => 'monday', 'start' => '14:00', 'end' => '16:00'],
-            ],
+            'price_centimes' => fake()->numberBetween(10000, 50000),
+            'is_active' => fake()->boolean(90),
         ];
     }
 }

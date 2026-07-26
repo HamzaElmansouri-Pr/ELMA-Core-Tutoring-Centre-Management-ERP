@@ -23,6 +23,7 @@ const AppLayout: React.FC = () => {
           <Link to="/students" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">{t('sidebar_students', 'Students')}</Link>
           <Link to="/subjects" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">{t('sidebar_subjects', 'Subjects')}</Link>
           <Link to="/classes" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">{t('sidebar_classes', 'Classes')}</Link>
+          <Link to="/payments" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-green-600 dark:text-green-400">{t('sidebar_payments', 'Payments')}</Link>
           <Link to="/finance" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">Finance</Link>
           <Link to="/settings" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">Settings</Link>
         </nav>

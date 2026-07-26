@@ -2,10 +2,13 @@ import api from '@/lib/axios';
 import { type Subject } from './subjects';
 import { type Teacher } from './teachers';
 
-export interface ScheduleItem {
-  day: string;
-  start: string;
-  end: string;
+export interface ClassSession {
+  id: number;
+  school_class_id: number;
+  classroom_id: number;
+  day_of_week: string;
+  start_time: string;
+  end_time: string;
 }
 
 export interface SchoolClass {
@@ -13,9 +16,10 @@ export interface SchoolClass {
   name: string;
   subject_id: number;
   teacher_id: number;
-  schedule_info: ScheduleItem[];
+  price_centimes: number;
   subject?: Subject;
   teacher?: Teacher;
+  sessions?: ClassSession[];
   enrollments_count?: number;
 }
 

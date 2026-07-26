@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -10,7 +10,8 @@ import {
 import { getTeachers, type Teacher, deleteTeacher } from "@/api/teachers";
 import { TeacherFormDialog } from "@/components/teachers/TeacherFormDialog";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Plus, Edit, Trash2, Search } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -26,11 +27,22 @@ export function TeachersListPage() {
   const { t } = useTranslation("common");
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: teachers = [], refetch, isLoading } = useQuery({
     queryKey: ["teachers"],
     queryFn: getTeachers,
   });
+
+  const filteredTeachers = useMemo(() => {
+    if (!searchQuery.trim()) return teachers;
+    const q = searchQuery.toLowerCase().trim();
+    return teachers.filter(tc => 
+      tc.name?.toLowerCase().includes(q) ||
+      tc.phone?.toLowerCase().includes(q) ||
+      tc.whatsapp_phone?.toLowerCase().includes(q)
+    );
+  }, [teachers, searchQuery]);
 
   const handleEdit = (teacher: Teacher) => {
     setSelectedTeacher(teacher);
@@ -79,19 +91,30 @@ export function TeachersListPage() {
   ];
 
   const table = useReactTable({
-    data: teachers,
+    data: filteredTeachers,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h1 className="text-2xl font-semibold">{t("sidebar_teachers", "Teachers")}</h1>
-        <Button onClick={handleAdd}>
-          <Plus className="w-4 h-4 me-2" />
-          {t("add_teacher")}
-        </Button>
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="relative w-full sm:w-72">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder={t("search_teachers", "Search teachers...")}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 w-full bg-white dark:bg-slate-900"
+            />
+          </div>
+          <Button onClick={handleAdd} className="shrink-0">
+            <Plus className="w-4 h-4 me-2" />
+            {t("add_teacher")}
+          </Button>
+        </div>
       </div>
 
       <div className="border rounded-md bg-white dark:bg-slate-900 overflow-hidden">

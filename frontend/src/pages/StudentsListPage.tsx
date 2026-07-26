@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -11,7 +11,8 @@ import { getStudents, type Student, deleteStudent } from "@/api/students";
 import { StudentFormDialog } from "@/components/students/StudentFormDialog";
 import { SmartEnrollmentWizard } from "@/components/students/SmartEnrollmentWizard";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Plus, Edit, Trash2, Search } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -29,11 +30,24 @@ export function StudentsListPage() {
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: students = [], refetch, isLoading } = useQuery({
     queryKey: ["students"],
     queryFn: getStudents,
   });
+
+  const filteredStudents = useMemo(() => {
+    if (!searchQuery.trim()) return students;
+    const q = searchQuery.toLowerCase().trim();
+    return students.filter(s => 
+      s.first_name?.toLowerCase().includes(q) ||
+      s.last_name?.toLowerCase().includes(q) ||
+      s.parent_phone?.toLowerCase().includes(q) ||
+      `${s.first_name} ${s.last_name}`.toLowerCase().includes(q) ||
+      `${s.last_name} ${s.first_name}`.toLowerCase().includes(q)
+    );
+  }, [students, searchQuery]);
 
   const handleEdit = (student: Student) => {
     setSelectedStudent(student);
@@ -90,19 +104,30 @@ export function StudentsListPage() {
   ];
 
   const table = useReactTable({
-    data: students,
+    data: filteredStudents,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h1 className="text-2xl font-semibold">{t("sidebar_students", "Students")}</h1>
-        <Button onClick={handleAdd}>
-          <Plus className="w-4 h-4 me-2" />
-          {t("add_student")}
-        </Button>
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="relative w-full sm:w-72">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder={t("search_students", "Search students...")}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 w-full bg-white dark:bg-slate-900"
+            />
+          </div>
+          <Button onClick={handleAdd} className="shrink-0">
+            <Plus className="w-4 h-4 me-2" />
+            {t("add_student")}
+          </Button>
+        </div>
       </div>
 
       <div className="border rounded-md bg-white dark:bg-slate-900 overflow-hidden">
