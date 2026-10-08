@@ -70,77 +70,79 @@ export function AttendanceDialog({ open, onOpenChange, classId, className, sessi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto sm:rounded-2xl">
         <DialogHeader>
-          <DialogTitle>
-            {t('attendance_for', 'Attendance for')} {className} - {sessionDate}
+          <DialogTitle className="text-xl font-bold tracking-tight">
+            {t('attendance_for', 'Attendance for')} {className} <span className="text-muted-foreground font-medium">- {sessionDate}</span>
           </DialogTitle>
         </DialogHeader>
 
-        <div className="py-4">
-          <div className="flex gap-2 mb-4">
-            <Button variant="outline" size="sm" onClick={() => markAll('present')}>{t('mark_all_present', 'Mark All Present')}</Button>
-            <Button variant="outline" size="sm" onClick={() => markAll('absent')}>{t('mark_all_absent', 'Mark All Absent')}</Button>
+        <div className="py-4 space-y-4">
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" className="rounded-full" onClick={() => markAll('present')}>{t('mark_all_present', 'Mark All Present')}</Button>
+            <Button variant="outline" size="sm" className="rounded-full" onClick={() => markAll('absent')}>{t('mark_all_absent', 'Mark All Absent')}</Button>
           </div>
 
           {isLoading ? (
-            <div>Loading roster...</div>
+            <div className="flex justify-center items-center h-32 text-muted-foreground">Loading roster...</div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('student', 'Student')}</TableHead>
-                  <TableHead className="text-center">{t('present', 'Present')}</TableHead>
-                  <TableHead className="text-center">{t('absent', 'Absent')}</TableHead>
-                  <TableHead className="text-center">{t('late', 'Late')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {(roster || []).map((student) => (
-                  <TableRow key={student.enrollment_id}>
-                    <TableCell className="font-medium">{student.student_name}</TableCell>
-                    <TableCell className="text-center">
-                      <input 
-                        type="radio" 
-                        name={`status-${student.enrollment_id}`} 
-                        checked={localRecords[student.enrollment_id] === 'present'}
-                        onChange={() => handleStatusChange(student.enrollment_id, 'present')}
-                        className="w-4 h-4 text-green-600"
-                      />
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <input 
-                        type="radio" 
-                        name={`status-${student.enrollment_id}`} 
-                        checked={localRecords[student.enrollment_id] === 'absent'}
-                        onChange={() => handleStatusChange(student.enrollment_id, 'absent')}
-                        className="w-4 h-4 text-red-600"
-                      />
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <input 
-                        type="radio" 
-                        name={`status-${student.enrollment_id}`} 
-                        checked={localRecords[student.enrollment_id] === 'late'}
-                        onChange={() => handleStatusChange(student.enrollment_id, 'late')}
-                        className="w-4 h-4 text-orange-600"
-                      />
-                    </TableCell>
+            <div className="border border-border rounded-xl bg-card shadow-sm overflow-hidden">
+              <Table>
+                <TableHeader className="bg-muted/50">
+                  <TableRow className="hover:bg-transparent border-border">
+                    <TableHead className="h-11 font-semibold text-muted-foreground">{t('student', 'Student')}</TableHead>
+                    <TableHead className="h-11 font-semibold text-muted-foreground text-center">{t('present', 'Present')}</TableHead>
+                    <TableHead className="h-11 font-semibold text-muted-foreground text-center">{t('absent', 'Absent')}</TableHead>
+                    <TableHead className="h-11 font-semibold text-muted-foreground text-center">{t('late', 'Late')}</TableHead>
                   </TableRow>
-                ))}
-                {roster?.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-center text-gray-500 py-4">No active enrollments found for this class.</TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {(roster || []).map((student) => (
+                    <TableRow key={student.enrollment_id} className="hover:bg-muted/30 transition-colors border-border group">
+                      <TableCell className="font-medium text-foreground">{student.student_name}</TableCell>
+                      <TableCell className="text-center">
+                        <input 
+                          type="radio" 
+                          name={`status-${student.enrollment_id}`} 
+                          checked={localRecords[student.enrollment_id] === 'present'}
+                          onChange={() => handleStatusChange(student.enrollment_id, 'present')}
+                          className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 dark:border-slate-700 bg-transparent"
+                        />
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <input 
+                          type="radio" 
+                          name={`status-${student.enrollment_id}`} 
+                          checked={localRecords[student.enrollment_id] === 'absent'}
+                          onChange={() => handleStatusChange(student.enrollment_id, 'absent')}
+                          className="w-4 h-4 text-destructive focus:ring-destructive border-gray-300 dark:border-slate-700 bg-transparent"
+                        />
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <input 
+                          type="radio" 
+                          name={`status-${student.enrollment_id}`} 
+                          checked={localRecords[student.enrollment_id] === 'late'}
+                          onChange={() => handleStatusChange(student.enrollment_id, 'late')}
+                          className="w-4 h-4 text-orange-500 focus:ring-orange-500 border-gray-300 dark:border-slate-700 bg-transparent"
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {roster?.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={4} className="h-32 text-center text-muted-foreground py-4">No active enrollments found for this class.</TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>{t('cancel', 'Cancel')}</Button>
-          <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending || Object.keys(localRecords).length === 0}>
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button variant="outline" className="rounded-full" onClick={() => onOpenChange(false)}>{t('cancel', 'Cancel')}</Button>
+          <Button className="rounded-full bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending || Object.keys(localRecords).length === 0}>
             {saveMutation.isPending ? t('saving', 'Saving...') : t('save_attendance', 'Save Attendance')}
           </Button>
         </DialogFooter>
