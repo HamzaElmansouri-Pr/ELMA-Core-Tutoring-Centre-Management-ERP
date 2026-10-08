@@ -1,6 +1,6 @@
-# ELMA Core
+# ELMA Core tutoring Center ERP
 
-ELMA Core is a trilingual, RTL-aware tutoring-centre management ERP. It gives centre staff one place to manage students, classes, attendance, invoicing, payments, and teacher payroll.
+Tutoring Center ERP is a trilingual, RTL-aware tutoring-centre management ERP. It gives centre staff one place to manage students, classes, attendance, invoicing, payments, and teacher payroll.
 
 ## Highlights
 
