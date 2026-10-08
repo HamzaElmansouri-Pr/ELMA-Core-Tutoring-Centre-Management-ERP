@@ -66,41 +66,56 @@ export function TimetablePage() {
   };
 
   return (
-    <div className="p-6 h-[calc(100vh-80px)] flex flex-col">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">{t('timetable', 'Timetable')}</h1>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={handlePrevWeek}>
+    <div className="p-4 sm:p-8 max-w-[1600px] mx-auto h-[calc(100vh-80px)] flex flex-col space-y-6">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-card p-6 rounded-2xl border border-border shadow-sm shrink-0">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-3">
+            <CalendarIcon className="w-6 h-6 text-primary" />
+            {t('timetable', 'Timetable Planning')}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">Manage class schedules and track daily attendance.</p>
+        </div>
+        
+        <div className="flex items-center gap-2 bg-muted/50 p-1.5 rounded-xl border border-border">
+          <Button variant="ghost" size="icon" className="rounded-lg hover:bg-background hover:shadow-sm" onClick={handlePrevWeek}>
             <ChevronLeft className="w-4 h-4" />
           </Button>
-          <Button variant="outline" onClick={handleToday}>
-            <CalendarIcon className="w-4 h-4 me-2" />
+          <Button variant="ghost" className="rounded-lg font-medium hover:bg-background hover:shadow-sm px-4" onClick={handleToday}>
             {t('today', 'Today')}
           </Button>
-          <Button variant="outline" size="icon" onClick={handleNextWeek}>
+          <Button variant="ghost" size="icon" className="rounded-lg hover:bg-background hover:shadow-sm" onClick={handleNextWeek}>
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
       </div>
 
-      <div className="flex-1 bg-white border rounded-md shadow-sm dark:bg-slate-900 flex flex-col overflow-hidden">
+      <div className="flex-1 bg-card border border-border rounded-2xl shadow-sm flex flex-col overflow-hidden min-h-0">
         {/* Header Row */}
-        <div className="grid grid-cols-7 border-b bg-slate-50 dark:bg-slate-800">
-          {weekDates.map(wd => (
-            <div key={wd.formattedDate} className="p-3 text-center border-e last:border-e-0">
-              <div className="text-sm font-semibold capitalize">{t(wd.dayString, wd.dayString)}</div>
-              <div className="text-xs text-gray-500">{wd.display}</div>
-            </div>
-          ))}
+        <div className="grid grid-cols-7 border-b border-border bg-muted/30 shrink-0">
+          {weekDates.map(wd => {
+            const isToday = wd.formattedDate === new Date().toISOString().split('T')[0];
+            return (
+              <div key={wd.formattedDate} className={`p-4 text-center border-e border-border last:border-e-0 relative ${isToday ? 'bg-primary/5' : ''}`}>
+                {isToday && <div className="absolute top-0 left-0 right-0 h-1 bg-primary" />}
+                <div className={`text-sm font-bold uppercase tracking-wider mb-1 ${isToday ? 'text-primary' : 'text-muted-foreground'}`}>
+                  {t(wd.dayString, wd.dayString)}
+                </div>
+                <div className={`text-lg font-medium ${isToday ? 'text-foreground' : 'text-muted-foreground/80'}`}>
+                  {wd.display}
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         {/* Grid Body */}
         <div className="flex-1 relative grid grid-cols-7 overflow-y-auto">
           {/* Hour Lines (Background) */}
-          <div className="absolute inset-0 pointer-events-none flex flex-col">
+          <div className="absolute inset-0 pointer-events-none flex flex-col min-w-full">
             {Array.from({ length: END_HOUR - START_HOUR }).map((_, i) => (
-              <div key={i} className="flex-1 border-b opacity-50 relative">
-                <span className="absolute -top-3 left-2 text-xs text-gray-400 bg-white dark:bg-slate-900 px-1">
+              <div key={i} className="flex-1 border-b border-border/50 relative">
+                <span className="absolute -top-2.5 left-2 text-[10px] font-semibold text-muted-foreground/70 bg-card px-1 rounded-sm">
                   {START_HOUR + i}:00
                 </span>
               </div>
@@ -110,19 +125,23 @@ export function TimetablePage() {
           {/* Columns */}
           {weekDates.map(wd => {
             const dayBlocks = blocks.filter(b => b.day === wd.dayString);
+            const isToday = wd.formattedDate === new Date().toISOString().split('T')[0];
             
             return (
-              <div key={wd.formattedDate} className="relative border-e last:border-e-0 h-[800px]">
+              <div key={wd.formattedDate} className={`relative border-e border-border/50 last:border-e-0 min-h-[800px] ${isToday ? 'bg-primary/[0.02]' : ''}`}>
                 {dayBlocks.map((block, idx) => (
                   <div 
                     key={`${block.class_id}-${idx}`}
-                    className="absolute inset-x-1 p-2 rounded border bg-blue-100 border-blue-300 text-blue-900 shadow-sm cursor-pointer hover:bg-blue-200 transition-colors dark:bg-blue-900 dark:border-blue-700 dark:text-blue-100 flex flex-col justify-center items-center text-center overflow-hidden"
+                    className="absolute inset-x-1.5 p-3 rounded-xl bg-blue-100/80 border border-blue-200 text-blue-900 shadow-sm cursor-pointer hover:bg-blue-100 hover:shadow-md hover:ring-2 hover:ring-blue-400 hover:z-10 transition-all dark:bg-blue-500/20 dark:border-blue-500/30 dark:text-blue-100 dark:hover:bg-blue-500/30 flex flex-col"
                     style={getStyleForBlock(block.start, block.end)}
                     onClick={() => setSelectedClass({ id: block.class_id, name: block.class_name, date: wd.formattedDate })}
                   >
-                    <div className="font-bold text-xs truncate w-full">{block.class_name}</div>
-                    <div className="text-[10px] opacity-80 truncate w-full">{block.subject_name}</div>
-                    <div className="text-[10px] opacity-80 truncate w-full">{block.start} - {block.end}</div>
+                    <div className="font-bold text-xs truncate w-full mb-0.5">{block.class_name}</div>
+                    <div className="text-[11px] opacity-90 truncate w-full font-medium">{block.subject_name}</div>
+                    <div className="mt-auto text-[10px] font-medium opacity-80 truncate w-full flex items-center gap-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-blue-500/50"></div>
+                      {block.start} - {block.end}
+                    </div>
                   </div>
                 ))}
               </div>
