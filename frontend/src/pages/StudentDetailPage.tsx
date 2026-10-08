@@ -37,79 +37,100 @@ export function StudentDetailPage() {
   if (isLoading) return <div className="p-6">Loading...</div>;
   if (!student) return <div className="p-6">Student not found.</div>;
 
+  const initials = student ? `${student.first_name.charAt(0)}${student.last_name.charAt(0)}`.toUpperCase() : "?";
+
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
+    <div className="p-8 max-w-7xl mx-auto space-y-6">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-card p-6 rounded-2xl border border-border shadow-sm">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <Button variant="ghost" size="icon" className="hover:bg-primary/10 hover:text-primary transition-colors rounded-full shrink-0" asChild>
             <Link to="/students"><ArrowLeft className="w-5 h-5" /></Link>
           </Button>
-          <h1 className="text-2xl font-semibold">
-            {student.first_name} {student.last_name}
-          </h1>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-lg tracking-wider border border-primary/20 shrink-0">
+              {initials}
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                {student.first_name} {student.last_name}
+              </h1>
+              <p className="text-sm text-muted-foreground mt-1">Manage student details and class enrollments.</p>
+            </div>
+          </div>
         </div>
-        <Button onClick={() => setIsWizardOpen(true)}>
-          <Plus className="w-4 h-4 me-2" />
+        <Button onClick={() => setIsWizardOpen(true)} className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-full font-medium shadow-sm transition-colors">
+          <Plus className="w-4 h-4 mr-2" />
           {t("enroll_student", "Enroll in Class")}
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white p-4 border rounded-md dark:bg-slate-900">
-          <h2 className="text-sm font-semibold text-gray-500 mb-2">Student Info</h2>
-          <p><strong>DOB:</strong> {student.date_of_birth}</p>
-          <p><strong>Parent Phone:</strong> {student.parent_phone}</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="bg-card p-6 border border-border rounded-2xl shadow-sm space-y-4">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">Student Info</h2>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-muted-foreground font-medium">Date of Birth:</span>
+              <span className="text-foreground font-semibold">{student.date_of_birth}</span>
+            </div>
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-muted-foreground font-medium">Parent Phone:</span>
+              <span className="text-foreground font-semibold">{student.parent_phone}</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="bg-white p-6 border rounded-md dark:bg-slate-900">
-        <h2 className="text-lg font-semibold mb-4">Enrollments</h2>
+      <div className="border border-border rounded-2xl bg-card shadow-sm overflow-hidden">
+        <div className="p-5 border-b border-border bg-muted/20">
+          <h2 className="text-lg font-semibold text-foreground">Enrollments</h2>
+        </div>
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Class</TableHead>
-              <TableHead>Subject</TableHead>
-              <TableHead>Teacher</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Actions</TableHead>
+          <TableHeader className="bg-muted/50">
+            <TableRow className="hover:bg-transparent border-border">
+              <TableHead className="h-12 font-semibold text-muted-foreground">Class</TableHead>
+              <TableHead className="h-12 font-semibold text-muted-foreground">Subject</TableHead>
+              <TableHead className="h-12 font-semibold text-muted-foreground">Teacher</TableHead>
+              <TableHead className="h-12 font-semibold text-muted-foreground text-right">Price</TableHead>
+              <TableHead className="h-12 font-semibold text-muted-foreground">Status</TableHead>
+              <TableHead className="h-12 font-semibold text-muted-foreground text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {(student.active_enrollments || []).map((enrollment: any) => (
-              <TableRow key={enrollment.id}>
-                <TableCell>{enrollment.school_class?.name}</TableCell>
-                <TableCell>{enrollment.school_class?.subject?.name}</TableCell>
-                <TableCell>{enrollment.school_class?.teacher?.name}</TableCell>
-                <TableCell>{formatDH(enrollment.school_class?.subject?.default_price_centimes || 0)}</TableCell>
+              <TableRow key={enrollment.id} className="hover:bg-muted/30 transition-colors border-border group">
+                <TableCell className="font-medium text-foreground">{enrollment.school_class?.name}</TableCell>
+                <TableCell className="text-muted-foreground">{enrollment.school_class?.subject?.name}</TableCell>
+                <TableCell className="text-muted-foreground">{enrollment.school_class?.teacher?.name}</TableCell>
+                <TableCell className="text-right font-medium text-emerald-600 dark:text-emerald-400">{formatDH(enrollment.school_class?.subject?.default_price_centimes || 0)}</TableCell>
                 <TableCell>
-                  <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Active</span>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">Active</span>
                 </TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="icon" title="End Enrollment" onClick={() => handleEndEnrollment(enrollment.id)}>
-                      <StopCircle className="w-4 h-4 text-orange-500" />
+                <TableCell className="text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    <Button variant="ghost" size="sm" className="hover:bg-orange-100 hover:text-orange-600 text-muted-foreground transition-colors" title="End Enrollment" onClick={() => handleEndEnrollment(enrollment.id)}>
+                      <StopCircle className="w-4 h-4 mr-2 text-orange-500" /> End
                     </Button>
-                    <Button variant="ghost" size="icon" title="Delete Enrollment (Mistake)" onClick={() => handleDeleteEnrollment(enrollment.id)}>
-                      <Trash2 className="w-4 h-4 text-red-500" />
+                    <Button variant="ghost" size="sm" className="hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-colors" title="Delete Enrollment (Mistake)" onClick={() => handleDeleteEnrollment(enrollment.id)}>
+                      <Trash2 className="w-4 h-4 mr-2 text-destructive" /> Delete
                     </Button>
                   </div>
                 </TableCell>
               </TableRow>
             ))}
             {(student.ended_enrollments || []).map((enrollment: any) => (
-              <TableRow key={enrollment.id} className="opacity-60">
-                <TableCell>{enrollment.school_class?.name}</TableCell>
-                <TableCell>{enrollment.school_class?.subject?.name}</TableCell>
-                <TableCell>{enrollment.school_class?.teacher?.name}</TableCell>
-                <TableCell>{formatDH(enrollment.school_class?.subject?.default_price_centimes || 0)}</TableCell>
+              <TableRow key={enrollment.id} className="hover:bg-muted/30 transition-colors border-border group opacity-60">
+                <TableCell className="font-medium text-foreground">{enrollment.school_class?.name}</TableCell>
+                <TableCell className="text-muted-foreground">{enrollment.school_class?.subject?.name}</TableCell>
+                <TableCell className="text-muted-foreground">{enrollment.school_class?.teacher?.name}</TableCell>
+                <TableCell className="text-right font-medium text-muted-foreground">{formatDH(enrollment.school_class?.subject?.default_price_centimes || 0)}</TableCell>
                 <TableCell>
-                  <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">Ended</span>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">Ended</span>
                 </TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="icon" title="Delete Enrollment (Mistake)" onClick={() => handleDeleteEnrollment(enrollment.id)}>
-                      <Trash2 className="w-4 h-4 text-red-500" />
+                <TableCell className="text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    <Button variant="ghost" size="sm" className="hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-colors" title="Delete Enrollment (Mistake)" onClick={() => handleDeleteEnrollment(enrollment.id)}>
+                      <Trash2 className="w-4 h-4 mr-2 text-destructive" /> Delete
                     </Button>
                   </div>
                 </TableCell>
@@ -117,7 +138,15 @@ export function StudentDetailPage() {
             ))}
             {!(student.active_enrollments?.length) && !(student.ended_enrollments?.length) && (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-4">No enrollments found.</TableCell>
+                <TableCell colSpan={6} className="h-64 text-center">
+                  <div className="flex flex-col items-center justify-center text-muted-foreground">
+                    <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                      <StopCircle className="w-8 h-8 text-muted-foreground/50" />
+                    </div>
+                    <p className="text-lg font-semibold text-foreground">No enrollments found.</p>
+                    <p className="text-sm mt-1">Enroll the student in a class to get started.</p>
+                  </div>
+                </TableCell>
               </TableRow>
             )}
           </TableBody>
