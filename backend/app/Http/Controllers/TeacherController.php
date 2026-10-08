@@ -42,7 +42,7 @@ class TeacherController extends Controller
     public function all()
     {
         $teachers = Cache::rememberForever('teachers_all', function () {
-            return Teacher::where('is_active', true)->orderBy('name')->get();
+            return Teacher::orderBy('name')->get();
         });
 
         return TeacherResource::collection($teachers);

@@ -123,4 +123,43 @@ class PaymentTest extends TestCase
         $response->assertJsonCount(1, 'data');
         $this->assertEquals(15000, $response->json('data.0.amount_centimes'));
     }
+
+    public function test_invoice_detail_payment_and_refund_endpoints_update_the_invoice(): void
+    {
+        $student = Student::factory()->create();
+        $invoice = Invoice::create([
+            'student_id' => $student->id,
+            'month' => 1,
+            'year' => 2026,
+            'total_amount_centimes' => 30000,
+            'paid_amount_centimes' => 0,
+            'discount_centimes' => 0,
+            'status' => 'unpaid',
+        ]);
+
+        $this->actingAs($this->user)
+            ->postJson("/api/invoices/{$invoice->id}/payments", [
+                'amount_centimes' => 20000,
+                'payment_method' => 'cash',
+            ])
+            ->assertCreated()
+            ->assertJsonPath('data.type', 'payment');
+
+        $invoice->refresh();
+        $this->assertSame(20000, $invoice->paid_amount_centimes);
+        $this->assertSame('partial', $invoice->status);
+
+        $this->actingAs($this->user)
+            ->postJson("/api/invoices/{$invoice->id}/refunds", [
+                'amount_centimes' => 5000,
+                'reason' => 'Student withdrew from one class.',
+            ])
+            ->assertCreated()
+            ->assertJsonPath('data.type', 'refund');
+
+        $invoice->refresh();
+        $this->assertSame(15000, $invoice->paid_amount_centimes);
+        $this->assertSame('partial', $invoice->status);
+        $this->assertDatabaseCount('payments', 2);
+    }
 }

@@ -64,4 +64,34 @@ class InvoiceTest extends TestCase
         $response = $this->actingAs($this->user)->postJson('/api/invoices/generate', $payload);
         $response->assertStatus(422);
     }
+
+    public function test_invoice_generation_uses_centime_price_overrides(): void
+    {
+        $student = Student::factory()->create();
+        $subject = Subject::factory()->create();
+        $schoolClass = SchoolClass::factory()->create([
+            'subject_id' => $subject->id,
+            'price_centimes' => 50000,
+        ]);
+
+        Enrollment::create([
+            'student_id' => $student->id,
+            'school_class_id' => $schoolClass->id,
+            'status' => 'active',
+            'start_date' => now()->startOfMonth(),
+            'custom_price_override_centimes' => 27500,
+        ]);
+
+        $this->actingAs($this->user)
+            ->postJson('/api/invoices/generate', [
+                'month' => now()->month,
+                'year' => now()->year,
+            ])
+            ->assertCreated();
+
+        $this->assertDatabaseHas('invoices', [
+            'student_id' => $student->id,
+            'total_amount_centimes' => 27500,
+        ]);
+    }
 }

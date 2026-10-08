@@ -23,7 +23,7 @@ class UpdateSchoolClassRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['sometimes', 'required', 'string', 'max:255'],
+            'name' => ['sometimes', 'nullable', 'string', 'max:255'],
             'subject_id' => ['sometimes', 'required', 'exists:subjects,id,deleted_at,NULL'],
             'teacher_id' => ['sometimes', 'required', 'exists:teachers,id,deleted_at,NULL'],
             'price_centimes' => ['sometimes', 'required', 'integer', 'min:0'],

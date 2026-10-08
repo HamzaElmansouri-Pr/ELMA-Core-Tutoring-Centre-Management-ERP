@@ -49,11 +49,17 @@ export const getInvoiceDetails = async (id: number): Promise<Invoice> => {
   return response.data.data;
 };
 
-export const recordPayment = async (invoiceId: number, amount_centimes: number, type: 'payment' | 'refund', payment_method?: string, reason?: string): Promise<Payment> => {
+export const recordPayment = async (invoiceId: number, amount_centimes: number, payment_method = 'cash'): Promise<Payment> => {
   const response = await api.post(`/api/invoices/${invoiceId}/payments`, {
     amount_centimes,
-    type,
     payment_method,
+  });
+  return response.data.data;
+};
+
+export const recordRefund = async (invoiceId: number, amount_centimes: number, reason: string): Promise<Payment> => {
+  const response = await api.post(`/api/invoices/${invoiceId}/refunds`, {
+    amount_centimes,
     reason,
   });
   return response.data.data;

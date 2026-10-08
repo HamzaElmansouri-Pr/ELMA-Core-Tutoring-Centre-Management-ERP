@@ -12,7 +12,7 @@ class SettingsController extends Controller
     public function index()
     {
         $setting = Setting::firstOrCreate([], [
-            'center_name' => 'ELMA Core',
+            'center_name' => 'Tutoring Centre',
             'default_locale' => 'en',
         ]);
         
@@ -30,7 +30,7 @@ class SettingsController extends Controller
     public function store(Request $request)
     {
         $setting = Setting::firstOrCreate([], [
-            'center_name' => 'ELMA Core',
+            'center_name' => 'Tutoring Centre',
             'default_locale' => 'en',
         ]);
 

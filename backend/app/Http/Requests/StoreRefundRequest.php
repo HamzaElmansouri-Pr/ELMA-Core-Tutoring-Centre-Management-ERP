@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreRefundRequest extends FormRequest
@@ -12,7 +11,7 @@ class StoreRefundRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,7 +22,8 @@ class StoreRefundRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'amount_centimes' => ['required', 'integer', 'min:1'],
+            'reason' => ['required', 'string', 'max:1000'],
         ];
     }
 }

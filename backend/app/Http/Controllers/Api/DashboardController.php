@@ -32,18 +32,16 @@ class DashboardController extends Controller
             $q->where('status', 'active');
         })->count();
 
-        $todayStr = strtolower(now()->englishDayOfWeek);
-        
-        $sessionsToday = \App\Models\ClassSession::whereRaw('LOWER(day_of_week) = ?', [$todayStr])
-            ->whereHas('schoolClass', function ($q) {
-                $q->where('is_active', true);
-            })->count();
+        $activeTeachersCount = \App\Models\Teacher::count();
+
+        $activeClassesCount = \App\Models\SchoolClass::where('is_active', true)->count();
 
         return response()->json([
             'data' => [
                 'revenue_this_month_centimes' => $netRevenueCentimes,
                 'active_students' => $activeStudentsCount,
-                'sessions_today' => $sessionsToday,
+                'total_teachers' => $activeTeachersCount,
+                'total_classes' => $activeClassesCount,
             ]
         ]);
     }
@@ -70,37 +68,25 @@ class DashboardController extends Controller
         return response()->json(['data' => $alerts]);
     }
 
-    public function profitBreakdown()
+    public function statsBreakdown()
     {
-        $start = now()->subMonths(5)->startOfMonth();
-        $end = now()->endOfMonth();
+        $subjects = \App\Models\Subject::all();
 
-        $allocations = PaymentAllocation::with(['invoiceItem.schoolClass.subject', 'payment'])
-            ->whereHas('payment', function($q) use ($start, $end) {
-                $q->whereBetween('created_at', [$start, $end]);
-            })
-            ->get();
+        $data = $subjects->map(function ($subject) {
+            $enrollmentCount = \App\Models\Enrollment::where('status', 'active')
+                ->whereHas('schoolClass', function ($q) use ($subject) {
+                    $q->where('subject_id', $subject->id);
+                })->count();
 
-        $months = [];
-        for ($i = 5; $i >= 0; $i--) {
-            $d = now()->subMonths($i);
-            $key = $d->format('M Y');
-            $months[$key] = ['name' => $key];
-        }
+            $classCount = $subject->schoolClasses()->count();
 
-        foreach ($allocations as $alloc) {
-            if (!$alloc->payment) continue;
+            return [
+                'name' => $subject->name,
+                'Students' => $enrollmentCount,
+                'Classes' => $classCount,
+            ];
+        });
 
-            $monthKey = $alloc->payment->created_at->format('M Y');
-            $subjectName = $alloc->invoiceItem->schoolClass->subject->name ?? 'Unknown';
-            
-            if (!isset($months[$monthKey][$subjectName])) {
-                $months[$monthKey][$subjectName] = 0;
-            }
-            
-            $months[$monthKey][$subjectName] += $alloc->amount_centimes;
-        }
-
-        return response()->json(['data' => array_values($months)]);
+        return response()->json(['data' => $data]);
     }
 }

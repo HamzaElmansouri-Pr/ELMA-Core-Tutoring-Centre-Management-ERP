@@ -20,7 +20,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { cn } from "@/lib/utils";
 
 const classSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().optional(),
   subject_id: z.number().min(1, "Subject is required"),
   teacher_id: z.number().min(1, "Teacher is required"),
   price_dh: z.number().min(0, "Price must be positive"),
@@ -63,6 +63,8 @@ export function ClassFormDialog({
   });
 
   const onSubmit = async (data: ClassFormValues) => {
+    onSuccess(); // Optimistic close
+
     try {
       const payload = {
         name: data.name,
@@ -76,10 +78,9 @@ export function ClassFormDialog({
       } else {
         await createClass(payload as any);
       }
-      onSuccess();
     } catch (error) {
       console.error(error);
-      alert("An error occurred");
+      alert("An error occurred while saving");
     }
   };
 
@@ -95,8 +96,10 @@ export function ClassFormDialog({
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">{t("name")}</label>
-              <Input {...register("name")} />
+              <label className="block text-sm font-medium mb-1">
+                {t("name")} <span className="text-muted-foreground font-normal">({t("optional", "Optional")})</span>
+              </label>
+              <Input {...register("name")} placeholder={t("auto_generate_placeholder", "Leave empty to auto-generate")} />
               {errors.name && <span className="text-sm text-red-500">{errors.name.message}</span>}
             </div>
 

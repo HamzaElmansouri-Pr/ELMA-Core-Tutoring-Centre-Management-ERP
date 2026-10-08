@@ -81,7 +81,7 @@ export const ReceiptTemplate = forwardRef<HTMLDivElement, ReceiptTemplateProps>(
       {invoice.status === 'paid' && (
         <div className="mt-16 text-center">
           <div className="inline-block border-4 border-green-500 text-green-500 text-2xl font-bold uppercase py-2 px-6 transform -rotate-12 rounded">
-            PAID IN FULL
+            Payé
           </div>
         </div>
       )}

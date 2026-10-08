@@ -1,20 +1,19 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getDashboardKPIs, getUnpaidAlerts, getProfitBreakdown } from "@/api/dashboard";
+import { getDashboardKPIs, getUnpaidAlerts } from "@/api/dashboard";
 import { formatDH } from "@/utils/currency";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { ArrowRight, MessageCircleWarning } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-const RevenueChart = React.lazy(() => import("@/components/dashboard/RevenueChart"));
 
 export function DashboardPage() {
   const { t } = useTranslation("common");
   
   const { data: kpis } = useQuery({ queryKey: ["kpis"], queryFn: getDashboardKPIs });
   const { data: alerts } = useQuery({ queryKey: ["unpaidAlerts"], queryFn: getUnpaidAlerts });
-  const { data: breakdown } = useQuery({ queryKey: ["profitBreakdown"], queryFn: getProfitBreakdown });
+
 
   // Generate dynamic line colors for the chart
   const colors = ["#2563eb", "#16a34a", "#dc2626", "#ca8a04", "#9333ea", "#0891b2"];
@@ -24,7 +23,7 @@ export function DashboardPage() {
       <h1 className="text-2xl font-semibold">{t('dashboard', 'Dashboard')}</h1>
 
       {/* KPIs */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm text-gray-500 font-medium">Revenue This Month</CardTitle>
@@ -50,28 +49,28 @@ export function DashboardPage() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-gray-500 font-medium">Sessions Today</CardTitle>
+            <CardTitle className="text-sm text-gray-500 font-medium">Professors</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-blue-600">
-              {kpis ? kpis.sessions_today : '...'}
+              {kpis ? kpis.total_teachers : '...'}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-gray-500 font-medium">Classes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-purple-600">
+              {kpis ? kpis.total_classes : '...'}
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Profit Breakdown Chart */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Revenue by Subject (Last 6 Months)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <React.Suspense fallback={<div className="h-80 w-full flex items-center justify-center text-gray-400 animate-pulse bg-gray-50 dark:bg-gray-800 rounded-lg">Loading chart data...</div>}>
-              <RevenueChart breakdown={breakdown} colors={colors} />
-            </React.Suspense>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 gap-6 mt-6">
 
         {/* Unpaid Alerts */}
         <Card>

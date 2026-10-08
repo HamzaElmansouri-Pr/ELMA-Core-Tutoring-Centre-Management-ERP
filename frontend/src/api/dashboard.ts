@@ -3,7 +3,8 @@ import api from '@/lib/axios';
 export interface DashboardKPIs {
   revenue_this_month_centimes: number;
   active_students: number;
-  sessions_today: number;
+  total_teachers: number;
+  total_classes: number;
 }
 
 export interface UnpaidAlert {
@@ -25,7 +26,7 @@ export const getUnpaidAlerts = async (): Promise<UnpaidAlert[]> => {
   return response.data.data;
 };
 
-export const getProfitBreakdown = async (): Promise<any[]> => {
-  const response = await api.get('/api/dashboard/profit-breakdown');
+export const getStatsBreakdown = async (): Promise<any[]> => {
+  const response = await api.get('/api/dashboard/stats-breakdown');
   return response.data.data;
 };

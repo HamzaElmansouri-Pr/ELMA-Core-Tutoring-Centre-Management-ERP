@@ -30,14 +30,14 @@ const LanguageSelectScreen: React.FC = () => {
           >
             Français
           </button>
-          
+
           <button
             onClick={() => handleSelectLanguage('ar')}
             className="w-full bg-emerald-600 text-white py-3 px-4 rounded hover:bg-emerald-700 transition-colors text-lg font-medium"
           >
             العربية
           </button>
-          
+
           <button
             onClick={() => handleSelectLanguage('en')}
             className="w-full bg-gray-600 text-white py-3 px-4 rounded hover:bg-gray-700 transition-colors text-lg font-medium"

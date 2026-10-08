@@ -24,4 +24,9 @@ class Subject extends Model
             ->logFillable()
             ->logOnlyDirty();
     }
+
+    public function schoolClasses()
+    {
+        return $this->hasMany(SchoolClass::class);
+    }
 }

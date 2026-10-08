@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import axiosInstance, { fetchCsrfCookie } from '../lib/axios';
+import axiosInstance from '../lib/axios';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -27,9 +27,8 @@ const LoginPage: React.FC = () => {
   const onSubmit = async (data: LoginFormInputs) => {
     setError('');
     try {
-      await fetchCsrfCookie();
       const response = await axiosInstance.post('/api/login', data);
-      setUser(response.data.user);
+      setUser(response.data.user, response.data.token);
       navigate('/dashboard');
     } catch (err: any) {
       if (err.response?.status === 401) {

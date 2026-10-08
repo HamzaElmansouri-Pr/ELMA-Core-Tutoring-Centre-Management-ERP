@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getInvoiceDetails, recordPayment } from "@/api/finance";
+import { getInvoiceDetails, recordPayment, recordRefund } from "@/api/finance";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -40,7 +40,9 @@ export function InvoiceDetailPage() {
 
   const paymentMutation = useMutation({
     mutationFn: (args: { amount: number; type: 'payment' | 'refund'; reason?: string }) => 
-      recordPayment(Number(id), args.amount, args.type, 'cash', args.reason),
+      args.type === 'refund'
+        ? recordRefund(Number(id), args.amount, args.reason ?? '')
+        : recordPayment(Number(id), args.amount),
     onSuccess: () => {
       setIsPaymentOpen(false);
       setIsRefundOpen(false);

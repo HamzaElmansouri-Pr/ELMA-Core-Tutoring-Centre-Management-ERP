@@ -17,13 +17,13 @@ class Enrollment extends Model
         'student_id',
         'school_class_id',
         'status',
-        'custom_price_override',
+        'custom_price_override_centimes',
         'start_date',
         'end_date',
     ];
 
     protected $casts = [
-        'custom_price_override' => 'decimal:2',
+        'custom_price_override_centimes' => 'integer',
         'start_date' => 'date',
         'end_date' => 'date',
     ];

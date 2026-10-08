@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Enrollment;
 use App\Models\AttendanceRecord;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -12,9 +13,8 @@ class AttendanceController extends Controller
 {
     public function show($class_id, $session_date)
     {
-        // Find all enrollments for this class
-        $enrollments = Enrollment::with('student')
-            ->where('school_class_id', $class_id)
+        $enrollments = $this->eligibleEnrollments((int) $class_id, $session_date)
+            ->with('student')
             ->get();
 
         // Get existing attendance records for this date
@@ -40,19 +40,29 @@ class AttendanceController extends Controller
         $data = $request->validate([
             'class_id' => 'required|exists:school_classes,id',
             'session_date' => 'required|date',
-            'records' => 'required|array',
-            'records.*.enrollment_id' => 'required|exists:enrollments,id',
+            'records' => 'required|array|min:1',
+            'records.*.enrollment_id' => 'required|distinct|exists:enrollments,id',
             'records.*.status' => 'required|in:present,absent,late',
         ]);
 
-        $session_date = $data['session_date'];
+        $sessionDate = $data['session_date'];
+        $enrollmentIds = collect($data['records'])->pluck('enrollment_id');
+        $eligibleEnrollmentIds = $this->eligibleEnrollments($data['class_id'], $sessionDate)
+            ->whereIn('id', $enrollmentIds)
+            ->pluck('id');
 
-        DB::transaction(function() use ($data, $session_date) {
+        if ($eligibleEnrollmentIds->count() !== $enrollmentIds->unique()->count()) {
+            throw ValidationException::withMessages([
+                'records' => ['Each attendance record must belong to a student enrolled in this class on the session date.'],
+            ]);
+        }
+
+        DB::transaction(function () use ($data, $sessionDate) {
             foreach ($data['records'] as $record) {
                 AttendanceRecord::updateOrCreate(
                     [
                         'enrollment_id' => $record['enrollment_id'],
-                        'session_date' => $session_date,
+                        'session_date' => $sessionDate,
                     ],
                     [
                         'status' => $record['status']
@@ -62,5 +72,19 @@ class AttendanceController extends Controller
         });
 
         return response()->json(['message' => 'Attendance saved successfully.'], 200);
+    }
+
+    private function eligibleEnrollments(int $classId, string $sessionDate)
+    {
+        return Enrollment::query()
+            ->where('school_class_id', $classId)
+            ->whereDate('start_date', '<=', $sessionDate)
+            ->where(function ($query) use ($sessionDate) {
+                $query->where('status', 'active')
+                    ->orWhere(function ($endedQuery) use ($sessionDate) {
+                        $endedQuery->where('status', 'ended')
+                            ->whereDate('end_date', '>=', $sessionDate);
+                    });
+            });
     }
 }

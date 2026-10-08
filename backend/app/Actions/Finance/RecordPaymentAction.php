@@ -6,7 +6,6 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\PaymentAllocation;
 use Illuminate\Support\Facades\DB;
-use Exception;
 
 class RecordPaymentAction
 {
@@ -16,22 +15,26 @@ class RecordPaymentAction
             throw new \InvalidArgumentException("Payment amount must be greater than zero.");
         }
 
-        // Apply discount if provided
-        if ($discountCentimes !== null) {
-            $invoice->discount_centimes = $discountCentimes;
-            if ($discountReason !== null) {
+        return DB::transaction(function () use ($invoice, $amountCentimes, $paymentMethod, $discountCentimes, $discountReason) {
+            $invoice = Invoice::query()->lockForUpdate()->findOrFail($invoice->id);
+
+            if ($discountCentimes !== null) {
+                $maximumDiscount = $invoice->total_amount_centimes - $invoice->paid_amount_centimes;
+
+                if ($discountCentimes > $maximumDiscount) {
+                    throw new \InvalidArgumentException('Discount cannot exceed the unpaid invoice amount.');
+                }
+
+                $invoice->discount_centimes = $discountCentimes;
                 $invoice->discount_reason = $discountReason;
             }
-            $invoice->save();
-        }
 
-        $balanceDue = $invoice->total_amount_centimes - $invoice->discount_centimes - $invoice->paid_amount_centimes;
+            $balanceDue = $invoice->balance_due_centimes;
 
-        if ($amountCentimes > $balanceDue) {
-            throw new \InvalidArgumentException("Payment amount cannot exceed the balance due.");
-        }
+            if ($amountCentimes > $balanceDue) {
+                throw new \InvalidArgumentException('Payment amount cannot exceed the balance due.');
+            }
 
-        return DB::transaction(function () use ($invoice, $amountCentimes, $paymentMethod) {
             $payment = Payment::create([
                 'invoice_id' => $invoice->id,
                 'amount_centimes' => $amountCentimes,
@@ -39,11 +42,8 @@ class RecordPaymentAction
                 'payment_method' => $paymentMethod,
             ]);
 
-            // Update invoice total paid
             $invoice->paid_amount_centimes += $amountCentimes;
-            
-            // Set invoice status
-            $newBalanceDue = $invoice->total_amount_centimes - $invoice->discount_centimes - $invoice->paid_amount_centimes;
+            $newBalanceDue = $invoice->balance_due_centimes;
             if ($newBalanceDue <= 0) {
                 $invoice->status = 'paid';
             } else {
@@ -51,9 +51,8 @@ class RecordPaymentAction
             }
             $invoice->save();
 
-            // Proportional allocation to invoice items (Penny-rounding problem)
             $items = $invoice->items()->whereColumn('paid_amount_centimes', '<', 'amount_centimes')->get();
-            $totalUnpaidAmount = $items->sum(function($item) {
+            $totalUnpaidAmount = $items->sum(function ($item) {
                 return $item->amount_centimes - $item->paid_amount_centimes;
             });
 
@@ -65,10 +64,8 @@ class RecordPaymentAction
                     $itemRemaining = $item->amount_centimes - $item->paid_amount_centimes;
                     
                     if ($index === $itemCount - 1) {
-                        // Last item gets the exact remainder
                         $allocation = $amountCentimes - $allocatedTotal;
                     } else {
-                        // Proportional allocation with standard rounding
                         $proportion = $itemRemaining / $totalUnpaidAmount;
                         $allocation = (int) round($amountCentimes * $proportion);
                         $allocatedTotal += $allocation;

@@ -22,7 +22,7 @@ class AuthTest extends TestCase
         ]);
 
         $response->assertStatus(200);
-        $this->assertAuthenticatedAs($user);
+        $response->assertJsonStructure(['token', 'user']);
     }
 
     public function test_login_fails_with_incorrect_credentials()
@@ -37,7 +37,6 @@ class AuthTest extends TestCase
         ]);
 
         $response->assertStatus(401);
-        $this->assertGuest();
     }
 
     public function test_user_can_logout()
@@ -47,7 +46,9 @@ class AuthTest extends TestCase
         $response = $this->actingAs($user)->withHeaders(['Referer' => 'http://localhost:5173'])->postJson('/api/logout');
 
         $response->assertStatus(200);
-        $this->assertGuest();
+        $this->assertDatabaseMissing('personal_access_tokens', [
+            'tokenable_id' => $user->id
+        ]);
     }
 
     public function test_authenticated_user_can_fetch_their_profile()

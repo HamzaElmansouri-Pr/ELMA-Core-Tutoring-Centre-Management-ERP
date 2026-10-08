@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -6,7 +6,7 @@ import * as z from "zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Search, Loader2, UserPlus } from "lucide-react";
 
-import { type Student, getStudents, createStudent, bulkEnrollStudent } from "@/api/students";
+import { type Student, searchStudents, getStudentsPaginated, createStudent, bulkEnrollStudent } from "@/api/students";
 import { getClasses, type SchoolClass } from "@/api/classes";
 
 import {
@@ -43,25 +43,20 @@ export function SmartEnrollmentWizard({ isOpen, onClose, onSuccess }: SmartEnrol
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [selectedClasses, setSelectedClasses] = useState<number[]>([]);
 
-  // Queries
-  const { data: allStudents = [], isLoading: isSearching } = useQuery({
-    queryKey: ["students"],
-    queryFn: getStudents,
-  });
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  const searchResults = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return allStudents.slice(0, 10);
-    }
-    const q = searchQuery.toLowerCase().trim();
-    return allStudents.filter(s => 
-      s.first_name?.toLowerCase().includes(q) ||
-      s.last_name?.toLowerCase().includes(q) ||
-      s.parent_phone?.toLowerCase().includes(q) ||
-      `${s.first_name} ${s.last_name}`.toLowerCase().includes(q) ||
-      `${s.last_name} ${s.first_name}`.toLowerCase().includes(q)
-    ).slice(0, 15);
-  }, [allStudents, searchQuery]);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Queries
+  const { data: searchResults = [], isLoading: isSearching } = useQuery({
+    queryKey: ["students", "search", debouncedSearch],
+    queryFn: () => debouncedSearch.trim() ? searchStudents(debouncedSearch) : getStudentsPaginated({ per_page: 10 }).then(res => res.data),
+  });
 
   const { data: classes } = useQuery({
     queryKey: ["classes"],

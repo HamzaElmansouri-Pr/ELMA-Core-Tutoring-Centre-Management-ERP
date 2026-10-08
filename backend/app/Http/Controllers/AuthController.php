@@ -14,29 +14,27 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            return response()->json(['message' => 'Logged in successfully', 'user' => Auth::user()]);
+        $user = \App\Models\User::where('email', $request->email)->first();
+
+        if (!$user || !\Illuminate\Support\Facades\Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'message' => 'The provided credentials do not match our records.',
+            ], 401);
         }
 
+        $token = $user->createToken('api')->plainTextToken;
         return response()->json([
-            'message' => 'The provided credentials do not match our records.',
-        ], 401);
+            'message' => 'Logged in successfully', 
+            'user' => $user,
+            'token' => $token
+        ]);
     }
 
     public function logout(Request $request)
     {
-        Auth::guard('web')->logout();
-        
-        if ($request->hasSession()) {
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-        }
-
-        if (method_exists(Auth::guard('sanctum'), 'forgetUser')) {
-            Auth::guard('sanctum')->forgetUser();
-        } elseif (method_exists(Auth::guard('sanctum'), 'setUser')) {
-            Auth::guard('sanctum')->setUser(null);
+        $token = $request->user()->currentAccessToken();
+        if (method_exists($token, 'delete')) {
+            $token->delete();
         }
 
         return response()->json(['message' => 'Logged out successfully']);

@@ -47,16 +47,17 @@ export function StudentFormDialog({
   });
 
   const onSubmit = async (data: StudentFormValues) => {
+    onSuccess(); // Close instantly for better UX
+
     try {
       if (student) {
         await updateStudent(student.id, data as any);
       } else {
         await createStudent(data as any);
       }
-      onSuccess();
     } catch (error) {
       console.error(error);
-      alert("An error occurred");
+      alert("An error occurred while saving");
     }
   };
 

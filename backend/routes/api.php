@@ -25,7 +25,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('invoices/generate', [\App\Http\Controllers\Api\InvoiceController::class, 'generate']);
     Route::apiResource('invoices', \App\Http\Controllers\Api\InvoiceController::class)->only(['index', 'show']);
-    Route::post('invoices/{invoice}/payments', [\App\Http\Controllers\Api\PaymentController::class, 'store']);
+    Route::post('invoices/{invoice}/payments', [\App\Http\Controllers\Api\PaymentController::class, 'recordInvoicePayment']);
+    Route::post('invoices/{invoice}/refunds', [\App\Http\Controllers\Api\PaymentController::class, 'refund']);
     Route::get('/students/{student}/invoices', [\App\Http\Controllers\Api\PaymentController::class, 'getStudentInvoices']);
     Route::get('/payments', [\App\Http\Controllers\Api\PaymentController::class, 'index']);
     Route::post('/payments', [\App\Http\Controllers\Api\PaymentController::class, 'store']);
@@ -44,7 +45,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('dashboard/kpis', [\App\Http\Controllers\Api\DashboardController::class, 'kpis']);
     Route::get('dashboard/unpaid-alerts', [\App\Http\Controllers\Api\DashboardController::class, 'unpaidAlerts']);
-    Route::get('dashboard/profit-breakdown', [\App\Http\Controllers\Api\DashboardController::class, 'profitBreakdown']);
+    Route::get('dashboard/stats-breakdown', [\App\Http\Controllers\Api\DashboardController::class, 'statsBreakdown']);
 
     Route::get('backup/export', [\App\Http\Controllers\Api\BackupController::class, 'export']);
 });

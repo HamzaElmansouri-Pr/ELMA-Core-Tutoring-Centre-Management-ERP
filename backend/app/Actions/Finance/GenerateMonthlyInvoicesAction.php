@@ -60,8 +60,8 @@ class GenerateMonthlyInvoicesAction
                 $items = [];
 
                 foreach ($student->enrollments as $enrollment) {
-                    if ($enrollment->custom_price_override !== null) {
-                        $price = $enrollment->custom_price_override;
+                    if ($enrollment->custom_price_override_centimes !== null) {
+                        $price = $enrollment->custom_price_override_centimes;
                     } else {
                         $price = $enrollment->schoolClass->price_centimes;
                     }

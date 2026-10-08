@@ -64,4 +64,37 @@ class AttendanceTest extends TestCase
         ]);
         $this->assertDatabaseCount('attendance_records', 1); // Should overwrite, not duplicate
     }
+
+    public function test_attendance_cannot_be_recorded_for_an_enrollment_in_another_class(): void
+    {
+        $teacher = Teacher::factory()->create();
+        $subject = Subject::factory()->create();
+        $targetClass = SchoolClass::factory()->create([
+            'teacher_id' => $teacher->id,
+            'subject_id' => $subject->id,
+        ]);
+        $otherClass = SchoolClass::factory()->create([
+            'teacher_id' => $teacher->id,
+            'subject_id' => $subject->id,
+        ]);
+        $enrollment = Enrollment::create([
+            'student_id' => Student::factory()->create()->id,
+            'school_class_id' => $otherClass->id,
+            'status' => 'active',
+            'start_date' => now()->subDay(),
+        ]);
+
+        $this->actingAs(User::factory()->create())
+            ->postJson('/api/attendance', [
+                'class_id' => $targetClass->id,
+                'session_date' => now()->toDateString(),
+                'records' => [
+                    ['enrollment_id' => $enrollment->id, 'status' => 'present'],
+                ],
+            ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('records');
+
+        $this->assertDatabaseCount('attendance_records', 0);
+    }
 }

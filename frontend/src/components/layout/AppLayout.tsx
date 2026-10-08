@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
 import LanguageSwitcher from '../LanguageSwitcher';
@@ -30,15 +30,28 @@ const AppLayout: React.FC = () => {
         <div className="p-4 font-bold text-xl border-b border-gray-200 dark:border-gray-700">
           ELMA Core
         </div>
-        <nav className="flex-1 p-4 space-y-2">
-          <Link to="/dashboard" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">{t('dashboard')}</Link>
-          <Link to="/teachers" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">{t('sidebar_teachers', 'Teachers')}</Link>
-          <Link to="/students" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">{t('sidebar_students', 'Students')}</Link>
-          <Link to="/subjects" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">{t('sidebar_subjects', 'Subjects')}</Link>
-          <Link to="/classes" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">{t('sidebar_classes', 'Classes')}</Link>
-          <Link to="/payments" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-green-600 dark:text-green-400">{t('sidebar_payments', 'Payments')}</Link>
-          <Link to="/finance" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">{t('sidebar_finance', 'Finance')}</Link>
-          <Link to="/settings" className="block p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">{t('sidebar_settings', 'Settings')}</Link>
+        <nav className="flex-1 p-4 space-y-1" aria-label="Primary navigation">
+          {[
+            ['/dashboard', t('dashboard')],
+            ['/students', t('sidebar_students', 'Students')],
+            ['/teachers', t('sidebar_teachers', 'Teachers')],
+            ['/subjects', t('sidebar_subjects', 'Subjects')],
+            ['/classes', t('sidebar_classes', 'Classes')],
+            ['/timetable', t('sidebar_timetable', 'Timetable')],
+            ['/finance', t('sidebar_finance', 'Finance')],
+            ['/invoices', t('sidebar_invoices', 'Invoices')],
+            ['/payments', t('sidebar_payments', 'Payments')],
+            ['/payroll', t('sidebar_payroll', 'Payroll')],
+            ['/settings', t('sidebar_settings', 'Settings')],
+          ].map(([to, label]) => (
+            <NavLink
+              key={to}
+              to={to}
+              className={({ isActive }) => `block rounded px-3 py-2 text-sm transition-colors ${isActive ? 'bg-primary text-primary-foreground' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+            >
+              {label}
+            </NavLink>
+          ))}
         </nav>
       </aside>
 

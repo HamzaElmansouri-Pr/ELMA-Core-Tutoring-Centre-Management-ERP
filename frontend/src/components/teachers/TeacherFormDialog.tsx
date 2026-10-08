@@ -67,16 +67,17 @@ export function TeacherFormDialog({
   }, [sameAsPhone, phoneValue, setValue]);
 
   const onSubmit = async (data: TeacherFormValues) => {
+    onSuccess(); // Close instantly for better UX
+    
     try {
       if (teacher) {
         await updateTeacher(teacher.id, data as any);
       } else {
         await createTeacher(data as any);
       }
-      onSuccess();
     } catch (error) {
       console.error(error);
-      alert("An error occurred");
+      alert("An error occurred while saving");
     }
   };
 
