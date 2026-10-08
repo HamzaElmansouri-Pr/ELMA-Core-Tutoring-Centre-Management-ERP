@@ -70,123 +70,157 @@ export function PayrollPage() {
   });
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl font-semibold">Teacher Payroll</h1>
+    <div className="p-8 max-w-7xl mx-auto space-y-6">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-card p-6 rounded-2xl border border-border shadow-sm">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Teacher Payroll</h1>
+          <p className="text-sm text-muted-foreground mt-1">Manage and calculate teacher payments based on cash collected.</p>
+        </div>
         <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto">
-          <div className="relative flex-1 sm:w-64 sm:flex-initial">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+          <div className="relative flex-1 sm:w-64 sm:flex-initial group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <Input
               placeholder="Search teacher, status..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 w-full bg-white dark:bg-slate-900"
+              className="pl-10 h-10 w-full bg-background border-border focus-visible:ring-primary rounded-full shadow-sm"
             />
           </div>
-          <div className="flex gap-4">
-            <div>
-              <label className="text-sm font-medium me-2">Month:</label>
-              <input type="number" min={1} max={12} className="border rounded px-2 py-1 w-20 dark:bg-slate-900 dark:border-slate-700" value={month} onChange={(e) => setMonth(Number(e.target.value))} />
+          <div className="flex gap-4 items-center">
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-semibold text-muted-foreground">Month:</label>
+              <input type="number" min={1} max={12} className="border border-border rounded-full px-3 h-10 w-20 bg-background text-sm focus-visible:ring-2 focus-visible:ring-primary outline-none transition-shadow" value={month} onChange={(e) => setMonth(Number(e.target.value))} />
             </div>
-            <div>
-              <label className="text-sm font-medium me-2">Year:</label>
-              <input type="number" min={2000} className="border rounded px-2 py-1 w-24 dark:bg-slate-900 dark:border-slate-700" value={year} onChange={(e) => setYear(Number(e.target.value))} />
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-semibold text-muted-foreground">Year:</label>
+              <input type="number" min={2000} className="border border-border rounded-full px-3 h-10 w-24 bg-background text-sm focus-visible:ring-2 focus-visible:ring-primary outline-none transition-shadow" value={year} onChange={(e) => setYear(Number(e.target.value))} />
             </div>
           </div>
         </div>
       </div>
 
-      <div className="bg-white p-6 border rounded-md shadow-sm dark:bg-slate-900">
-        <p className="text-sm text-gray-500 mb-4 flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4" />
-          Payroll is calculated on a pure <b>Cash-basis</b>. It aggregates all physical payments (and refunds) collected during {month}/{year}.
-        </p>
+      {/* Table Section */}
+      <div className="border border-border rounded-2xl bg-card shadow-sm overflow-hidden">
+        <div className="p-5 border-b border-border bg-muted/20">
+          <p className="text-sm text-muted-foreground flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-orange-500" />
+            Payroll is calculated on a pure <b>Cash-basis</b>. It aggregates all physical payments (and refunds) collected during {month}/{year}.
+          </p>
+        </div>
         {isLoading ? (
-          <TableSkeleton columns={6} rows={6} headers={["Teacher", "Commission %", "Gross Collected", "Final Payout", "Status", "Actions"]} />
+          <div className="p-4">
+            <TableSkeleton columns={6} rows={6} headers={["Teacher", "Commission %", "Gross Collected", "Final Payout", "Status", "Actions"]} />
+          </div>
         ) : (
           <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Teacher</TableHead>
-                <TableHead>Commission %</TableHead>
-                <TableHead>Gross Collected</TableHead>
-                <TableHead>Final Payout</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
+            <TableHeader className="bg-muted/50">
+              <TableRow className="hover:bg-transparent border-border">
+                <TableHead className="h-12 font-semibold text-muted-foreground">Teacher</TableHead>
+                <TableHead className="h-12 font-semibold text-muted-foreground">Commission %</TableHead>
+                <TableHead className="h-12 font-semibold text-muted-foreground">Gross Collected</TableHead>
+                <TableHead className="h-12 font-semibold text-muted-foreground">Final Payout</TableHead>
+                <TableHead className="h-12 font-semibold text-muted-foreground">Status</TableHead>
+                <TableHead className="h-12 font-semibold text-muted-foreground text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {summaries.map((summary) => (
-                <TableRow key={summary.teacher_id}>
-                  <TableCell className="font-medium">{summary.teacher_name}</TableCell>
-                  <TableCell>{summary.commission_percentage}%</TableCell>
-                  <TableCell>{formatDH(summary.gross_collected_centimes)}</TableCell>
-                  <TableCell className="font-bold text-green-600">
-                    {formatDH(summary.payout_amount_centimes)}
-                  </TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      summary.status === 'paid' ? 'bg-blue-100 text-blue-800' :
-                      summary.status === 'calculated' ? 'bg-orange-100 text-orange-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {summary.status.toUpperCase().replace('_', ' ')}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {summary.status !== 'paid' && (
-                        <Button 
-                          variant="outline" size="sm" 
-                          onClick={() => calcMutation.mutate(summary.teacher_id)}
-                          disabled={calcMutation.isPending}
-                        >
-                          <Calculator className="w-4 h-4 me-2" />
-                          {summary.status === 'calculated' ? 'Recalculate' : 'Calculate'}
-                        </Button>
-                      )}
-                      
-                      {summary.record && (
-                        <>
+              {summaries.map((summary) => {
+                const parts = summary.teacher_name.split(' ');
+                const initials = (parts[0]?.[0] || '') + (parts[1]?.[0] || '');
+                return (
+                  <TableRow key={summary.teacher_id} className="hover:bg-muted/30 transition-colors border-border group">
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs tracking-wider shadow-sm border border-primary/20 shrink-0">
+                          {initials.toUpperCase() || 'T'}
+                        </div>
+                        <div className="font-semibold text-foreground">
+                          {summary.teacher_name}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-medium text-muted-foreground">{summary.commission_percentage}%</TableCell>
+                    <TableCell className="text-muted-foreground">{formatDH(summary.gross_collected_centimes)}</TableCell>
+                    <TableCell className="font-bold text-emerald-600 dark:text-emerald-400 text-base">
+                      {formatDH(summary.payout_amount_centimes)}
+                    </TableCell>
+                    <TableCell>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                        summary.status === 'paid' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                        summary.status === 'calculated' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400' :
+                        'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                      }`}>
+                        {summary.status.toUpperCase().replace('_', ' ')}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center justify-end gap-2">
+                        {summary.status !== 'paid' && (
                           <Button 
-                            variant="secondary" size="sm"
-                            onClick={() => setBreakdownData({ open: true, breakdown: summary.record!.breakdown, teacherName: summary.teacher_name })}
+                            variant="ghost" size="sm" 
+                            className="hover:bg-primary/10 hover:text-primary transition-colors text-muted-foreground"
+                            onClick={() => calcMutation.mutate(summary.teacher_id)}
+                            disabled={calcMutation.isPending}
                           >
-                            <Eye className="w-4 h-4" />
+                            <Calculator className="w-4 h-4 mr-2" />
+                            {summary.status === 'calculated' ? 'Recalculate' : 'Calculate'}
                           </Button>
-                          
-                          {summary.status !== 'paid' && (
+                        )}
+                        
+                        {summary.record && (
+                          <>
                             <Button 
-                              variant="default" size="sm"
-                              className="bg-red-600 hover:bg-red-700 text-white"
-                              onClick={() => setLockConfirmData({ open: true, recordId: summary.record!.id })}
+                              variant="ghost" size="icon"
+                              className="hover:bg-blue-100 hover:text-blue-600 transition-colors text-muted-foreground"
+                              onClick={() => setBreakdownData({ open: true, breakdown: summary.record!.breakdown, teacherName: summary.teacher_name })}
                             >
-                              <Lock className="w-4 h-4 me-2" /> Lock & Pay
+                              <Eye className="w-4 h-4" />
                             </Button>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+                            
+                            {summary.status !== 'paid' && (
+                              <Button 
+                                variant="ghost" size="sm"
+                                className="hover:bg-destructive/10 hover:text-destructive text-destructive transition-colors font-medium"
+                                onClick={() => setLockConfirmData({ open: true, recordId: summary.record!.id })}
+                              >
+                                <Lock className="w-4 h-4 mr-2" /> Lock
+                              </Button>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
               {summaries.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-4">No teachers found.</TableCell>
+                  <TableCell colSpan={6} className="h-64 text-center">
+                    <div className="flex flex-col items-center justify-center text-muted-foreground">
+                      <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                        <Calculator className="w-8 h-8 text-muted-foreground/50" />
+                      </div>
+                      <p className="text-lg font-semibold text-foreground">No teachers found.</p>
+                      <p className="text-sm mt-1">Check your search query or adjust the date.</p>
+                    </div>
+                  </TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
         )}
-        <PaginationControls
-          meta={meta}
-          onPageChange={(newPage) => setPage(newPage)}
-          onPerPageChange={(newPerPage) => {
-            setPerPage(newPerPage);
-            setPage(1);
-          }}
-          isLoading={isLoading}
-        />
+        <div className="border-t border-border bg-muted/20 px-4 py-3">
+          <PaginationControls
+            meta={meta}
+            onPageChange={(newPage) => setPage(newPage)}
+            onPerPageChange={(newPerPage) => {
+              setPerPage(newPerPage);
+              setPage(1);
+            }}
+            isLoading={isLoading}
+          />
+        </div>
       </div>
 
       <PayrollBreakdownDialog
@@ -199,22 +233,23 @@ export function PayrollPage() {
       />
 
       <Dialog open={lockConfirmData.open} onOpenChange={(open) => setLockConfirmData(prev => ({ ...prev, open }))}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-red-600 flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5" /> Irreversible Action
+            <DialogTitle className="text-destructive flex items-center gap-2 text-xl">
+              <AlertTriangle className="w-6 h-6" /> Irreversible Action
             </DialogTitle>
           </DialogHeader>
-          <div className="py-4">
-            <p className="text-sm font-medium">Are you absolutely sure you want to mark this payroll as PAID?</p>
-            <p className="text-sm text-gray-500 mt-2">
+          <div className="py-4 space-y-3">
+            <p className="text-base font-semibold text-foreground">Are you absolutely sure you want to mark this payroll as PAID?</p>
+            <p className="text-sm text-muted-foreground leading-relaxed">
               Once locked, this payroll record becomes immutable. You will NOT be able to recalculate it even if past invoices change. This step indicates that the physical cash has been handed to the teacher.
             </p>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setLockConfirmData({ open: false, recordId: null })}>Cancel</Button>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" className="rounded-full" onClick={() => setLockConfirmData({ open: false, recordId: null })}>Cancel</Button>
             <Button 
               variant="destructive" 
+              className="rounded-full"
               onClick={() => lockConfirmData.recordId && lockMutation.mutate(lockConfirmData.recordId)}
               disabled={lockMutation.isPending}
             >
