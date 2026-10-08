@@ -11,6 +11,16 @@ ELMA Core is a trilingual, RTL-aware tutoring-centre management ERP. It gives ce
 - Dashboard KPIs, revenue trends, unpaid-invoice alerts, centre settings, and database export
 - English, French, and Arabic interfaces with RTL support and light/dark themes
 
+## Screenshots
+
+| Dashboard & KPIs | Student Management |
+| :---: | :---: |
+| <img src="frontend/public/Dashboard.png" alt="Dashboard" /> | <img src="frontend/public/Students.png" alt="Students" /> |
+| **Timetable & Attendance** | **Teachers, Subjects & Classes** |
+| <img src="frontend/public/Timetable%20&%20Attendance.png" alt="Timetable" /> | <img src="frontend/public/teatchers%20Subjects%20Classes.png" alt="Teachers & Classes" /> |
+| **Payments & Finance** | **System Architecture** |
+| <img src="frontend/public/Payement.png" alt="Payments" /> | <img src="frontend/public/ELMA_Core_System_Architecture.png" alt="Architecture" /> |
+
 ## Architecture
 
 The repository is intentionally split into a Laravel API and a React SPA.
