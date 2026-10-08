@@ -14,9 +14,9 @@ export function DashboardPage() {
   const { data: alerts } = useQuery({ queryKey: ["unpaidAlerts"], queryFn: getUnpaidAlerts });
 
   return (
-    <div className="p-8 space-y-8 bg-slate-50/50 dark:bg-slate-900/50 min-h-screen">
+    <div className="p-8 space-y-8 bg-background min-h-screen">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{t('dashboard', 'Dashboard overview')}</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">{t('dashboard', 'Dashboard overview')}</h1>
       </div>
 
       {/* Premium KPIs */}

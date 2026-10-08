@@ -24,10 +24,10 @@ const AppLayout: React.FC = () => {
   const { user, logout } = useAuthStore();
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex">
+    <div className="min-h-screen bg-background text-foreground flex">
       {/* Sidebar */}
-      <aside className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 hidden md:flex flex-col">
-        <div className="p-4 font-bold text-xl border-b border-gray-200 dark:border-gray-700">
+      <aside className="w-64 bg-card border-r border-border hidden md:flex flex-col">
+        <div className="p-4 font-bold text-xl border-b border-border">
           ELMA Core
         </div>
         <nav className="flex-1 p-4 space-y-1" aria-label="Primary navigation">
@@ -47,7 +47,7 @@ const AppLayout: React.FC = () => {
             <NavLink
               key={to}
               to={to}
-              className={({ isActive }) => `block rounded px-3 py-2 text-sm transition-colors ${isActive ? 'bg-primary text-primary-foreground' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+              className={({ isActive }) => `block rounded px-3 py-2 text-sm transition-colors ${isActive ? 'bg-primary text-primary-foreground font-semibold shadow-md' : 'hover:bg-muted text-muted-foreground hover:text-foreground'}`}
             >
               {label}
             </NavLink>
@@ -58,7 +58,7 @@ const AppLayout: React.FC = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Topbar */}
-        <header className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-6">
+        <header className="h-16 bg-card border-b border-border flex items-center justify-between px-6">
           <div className="flex items-center gap-4">
              {/* Mobile menu button could go here */}
           </div>
