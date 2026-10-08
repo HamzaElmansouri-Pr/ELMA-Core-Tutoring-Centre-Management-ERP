@@ -110,43 +110,45 @@ export function TimetablePage() {
         </div>
 
         {/* Grid Body */}
-        <div className="flex-1 relative grid grid-cols-7 overflow-y-auto">
-          {/* Hour Lines (Background) */}
-          <div className="absolute inset-0 pointer-events-none flex flex-col min-w-full">
-            {Array.from({ length: END_HOUR - START_HOUR }).map((_, i) => (
-              <div key={i} className="flex-1 border-b border-border/50 relative">
-                <span className="absolute -top-2.5 left-2 text-[10px] font-semibold text-muted-foreground/70 bg-card px-1 rounded-sm">
-                  {START_HOUR + i}:00
-                </span>
-              </div>
-            ))}
-          </div>
+        <div className="flex-1 overflow-y-auto">
+          <div className="relative grid grid-cols-7 h-[1000px] min-w-full">
+            {/* Hour Lines (Background) */}
+            <div className="absolute inset-0 pointer-events-none flex flex-col">
+              {Array.from({ length: END_HOUR - START_HOUR }).map((_, i) => (
+                <div key={i} className="flex-1 border-b border-border/50 relative">
+                  <span className="absolute -top-2.5 left-2 text-[10px] font-semibold text-muted-foreground/70 bg-card px-1 rounded-sm z-10">
+                    {START_HOUR + i}:00
+                  </span>
+                </div>
+              ))}
+            </div>
 
-          {/* Columns */}
-          {weekDates.map(wd => {
-            const dayBlocks = blocks.filter(b => b.day === wd.dayString);
-            const isToday = wd.formattedDate === new Date().toISOString().split('T')[0];
-            
-            return (
-              <div key={wd.formattedDate} className={`relative border-e border-border/50 last:border-e-0 min-h-[800px] ${isToday ? 'bg-primary/[0.02]' : ''}`}>
-                {dayBlocks.map((block, idx) => (
-                  <div 
-                    key={`${block.class_id}-${idx}`}
-                    className="absolute inset-x-1.5 p-3 rounded-xl bg-blue-100/80 border border-blue-200 text-blue-900 shadow-sm cursor-pointer hover:bg-blue-100 hover:shadow-md hover:ring-2 hover:ring-blue-400 hover:z-10 transition-all dark:bg-blue-500/20 dark:border-blue-500/30 dark:text-blue-100 dark:hover:bg-blue-500/30 flex flex-col"
-                    style={getStyleForBlock(block.start, block.end)}
-                    onClick={() => setSelectedClass({ id: block.class_id, name: block.class_name, date: wd.formattedDate })}
-                  >
-                    <div className="font-bold text-xs truncate w-full mb-0.5">{block.class_name}</div>
-                    <div className="text-[11px] opacity-90 truncate w-full font-medium">{block.subject_name}</div>
-                    <div className="mt-auto text-[10px] font-medium opacity-80 truncate w-full flex items-center gap-1">
-                      <div className="w-1.5 h-1.5 rounded-full bg-blue-500/50"></div>
-                      {block.start} - {block.end}
+            {/* Columns */}
+            {weekDates.map(wd => {
+              const dayBlocks = blocks.filter(b => b.day === wd.dayString);
+              const isToday = wd.formattedDate === new Date().toISOString().split('T')[0];
+              
+              return (
+                <div key={wd.formattedDate} className={`relative border-e border-border/50 last:border-e-0 ${isToday ? 'bg-primary/[0.02]' : ''}`}>
+                  {dayBlocks.map((block, idx) => (
+                    <div 
+                      key={`${block.class_id}-${idx}`}
+                      className="absolute inset-x-1.5 p-2 sm:p-3 rounded-xl bg-blue-100 border border-blue-200 text-blue-900 shadow-sm cursor-pointer hover:bg-blue-200 hover:shadow-md hover:ring-2 hover:ring-blue-400 hover:z-20 transition-all dark:bg-blue-900 dark:border-blue-700 dark:text-blue-100 dark:hover:bg-blue-800 flex flex-col overflow-hidden"
+                      style={getStyleForBlock(block.start, block.end)}
+                      onClick={() => setSelectedClass({ id: block.class_id, name: block.class_name, date: wd.formattedDate })}
+                    >
+                      <div className="font-bold text-xs truncate w-full mb-0.5">{block.class_name}</div>
+                      <div className="text-[11px] opacity-90 truncate w-full font-medium">{block.subject_name}</div>
+                      <div className="mt-auto text-[10px] font-medium opacity-80 truncate w-full flex items-center gap-1">
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></div>
+                        <span className="truncate">{block.start} - {block.end}</span>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            );
-          })}
+                  ))}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
