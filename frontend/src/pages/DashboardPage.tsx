@@ -4,9 +4,8 @@ import { getDashboardKPIs, getUnpaidAlerts } from "@/api/dashboard";
 import { formatDH } from "@/utils/currency";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { ArrowRight, MessageCircleWarning } from "lucide-react";
+import { ArrowRight, MessageCircleWarning, Wallet, GraduationCap, Users, Library } from "lucide-react";
 import { useTranslation } from "react-i18next";
-
 
 export function DashboardPage() {
   const { t } = useTranslation("common");
@@ -14,58 +13,71 @@ export function DashboardPage() {
   const { data: kpis } = useQuery({ queryKey: ["kpis"], queryFn: getDashboardKPIs });
   const { data: alerts } = useQuery({ queryKey: ["unpaidAlerts"], queryFn: getUnpaidAlerts });
 
-
-  // Generate dynamic line colors for the chart
-  const colors = ["#2563eb", "#16a34a", "#dc2626", "#ca8a04", "#9333ea", "#0891b2"];
-
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-semibold">{t('dashboard', 'Dashboard')}</h1>
+    <div className="p-8 space-y-8 bg-slate-50/50 dark:bg-slate-900/50 min-h-screen">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{t('dashboard', 'Dashboard overview')}</h1>
+      </div>
 
-      {/* KPIs */}
+      {/* Premium KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-gray-500 font-medium">Revenue This Month</CardTitle>
+        <Card className="relative overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-none bg-gradient-to-br from-emerald-500 to-green-600">
+          <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:scale-110 group-hover:opacity-30 transition-transform">
+            <Wallet className="w-24 h-24 text-white" />
+          </div>
+          <CardHeader className="pb-2 relative z-10">
+            <CardTitle className="text-sm font-medium text-emerald-100">Revenue This Month</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-green-600">
+          <CardContent className="relative z-10">
+            <div className="text-4xl font-extrabold text-white tracking-tight">
               {kpis ? formatDH(kpis.revenue_this_month_centimes) : '...'}
             </div>
-            <p className="text-xs text-gray-500 mt-1">Cash-basis (Payments - Refunds)</p>
+            <p className="text-xs text-emerald-100/80 mt-2 font-medium bg-black/10 inline-block px-2 py-1 rounded-full backdrop-blur-sm">Cash-basis (Payments - Refunds)</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-gray-500 font-medium">Active Students</CardTitle>
+        <Card className="relative overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-none bg-gradient-to-br from-blue-500 to-indigo-600">
+          <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:scale-110 group-hover:opacity-30 transition-transform">
+            <GraduationCap className="w-24 h-24 text-white" />
+          </div>
+          <CardHeader className="pb-2 relative z-10">
+            <CardTitle className="text-sm font-medium text-blue-100">Active Students</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">
+          <CardContent className="relative z-10">
+            <div className="text-4xl font-extrabold text-white tracking-tight">
               {kpis ? kpis.active_students : '...'}
             </div>
+            <p className="text-xs text-blue-100/80 mt-2 font-medium bg-black/10 inline-block px-2 py-1 rounded-full backdrop-blur-sm">Total Enrolled</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-gray-500 font-medium">Professors</CardTitle>
+        <Card className="relative overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-none bg-gradient-to-br from-amber-500 to-orange-600">
+          <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:scale-110 group-hover:opacity-30 transition-transform">
+            <Users className="w-24 h-24 text-white" />
+          </div>
+          <CardHeader className="pb-2 relative z-10">
+            <CardTitle className="text-sm font-medium text-amber-100">Professors</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-blue-600">
+          <CardContent className="relative z-10">
+            <div className="text-4xl font-extrabold text-white tracking-tight">
               {kpis ? kpis.total_teachers : '...'}
             </div>
+            <p className="text-xs text-amber-100/80 mt-2 font-medium bg-black/10 inline-block px-2 py-1 rounded-full backdrop-blur-sm">Active Teachers</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-gray-500 font-medium">Classes</CardTitle>
+        <Card className="relative overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-none bg-gradient-to-br from-purple-500 to-pink-600">
+          <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:scale-110 group-hover:opacity-30 transition-transform">
+            <Library className="w-24 h-24 text-white" />
+          </div>
+          <CardHeader className="pb-2 relative z-10">
+            <CardTitle className="text-sm font-medium text-purple-100">Classes</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-purple-600">
+          <CardContent className="relative z-10">
+            <div className="text-4xl font-extrabold text-white tracking-tight">
               {kpis ? kpis.total_classes : '...'}
             </div>
+            <p className="text-xs text-purple-100/80 mt-2 font-medium bg-black/10 inline-block px-2 py-1 rounded-full backdrop-blur-sm">Active School Classes</p>
           </CardContent>
         </Card>
       </div>
