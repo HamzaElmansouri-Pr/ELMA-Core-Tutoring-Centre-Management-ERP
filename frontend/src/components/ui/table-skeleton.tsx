@@ -18,16 +18,16 @@ export const TableSkeleton: React.FC<TableSkeletonProps> = ({ columns, rows = 6,
   };
 
   return (
-    <div className="border rounded-md bg-white dark:bg-slate-900 overflow-hidden shadow-sm animate-pulse">
+    <div className="border border-border rounded-2xl bg-card shadow-sm overflow-hidden animate-pulse">
       <Table>
-        <TableHeader>
-          <TableRow>
+        <TableHeader className="bg-muted/50">
+          <TableRow className="border-border">
             {Array.from({ length: columns }).map((_, i) => (
-              <TableHead key={i}>
+              <TableHead key={i} className="h-12 font-semibold text-muted-foreground">
                 {headers && headers[i] ? (
                   headers[i]
                 ) : (
-                  <div className="h-4 w-20 bg-gray-200 dark:bg-gray-700 rounded" />
+                  <div className="h-4 w-20 bg-muted rounded" />
                 )}
               </TableHead>
             ))}
@@ -35,11 +35,11 @@ export const TableSkeleton: React.FC<TableSkeletonProps> = ({ columns, rows = 6,
         </TableHeader>
         <TableBody>
           {Array.from({ length: rows }).map((_, rowIdx) => (
-            <TableRow key={rowIdx}>
+            <TableRow key={rowIdx} className="border-border">
               {Array.from({ length: columns }).map((_, colIdx) => (
                 <TableCell key={colIdx} className="py-4">
                   <div 
-                    className={`h-4 bg-gray-100 dark:bg-gray-800 rounded ${getCellWidthClass(colIdx)}`}
+                    className={`h-4 bg-muted/60 rounded ${getCellWidthClass(colIdx)}`}
                   />
                 </TableCell>
               ))}
