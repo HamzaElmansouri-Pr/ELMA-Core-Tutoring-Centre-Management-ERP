@@ -73,34 +73,56 @@ export function StudentsListPage() {
     columnHelper.accessor((row) => `${row.first_name} ${row.last_name}`, {
       id: "name",
       header: t("name"),
-      cell: (info) => (
-        <Link to={`/students/${info.row.original.id}`} className="text-blue-600 hover:underline">
-          {info.getValue()}
-        </Link>
-      ),
-    }),
-    columnHelper.accessor("parent_phone", {
-      header: t("parent_phone"),
-      cell: (info) => info.getValue() || "-",
+      cell: (info) => {
+        const student = info.row.original;
+        const initials = `${student.first_name.charAt(0)}${student.last_name.charAt(0)}`.toUpperCase();
+        return (
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs tracking-wider shadow-sm border border-primary/20">
+              {initials}
+            </div>
+            <div className="flex flex-col">
+              <Link to={`/students/${student.id}`} className="font-semibold text-foreground hover:text-primary transition-colors">
+                {info.getValue()}
+              </Link>
+              <span className="text-xs text-muted-foreground">{student.parent_phone || 'No phone'}</span>
+            </div>
+          </div>
+        );
+      },
     }),
     columnHelper.accessor("active_enrollments_count", {
       header: t("active_enrollments"),
-      cell: (info) => info.getValue() || 0,
+      cell: (info) => {
+        const val = info.getValue() || 0;
+        return (
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${val > 0 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'}`}>
+            {val} Active
+          </span>
+        );
+      },
     }),
     columnHelper.accessor("unpaid_invoices_count", {
       header: t("unpaid_invoices"),
-      cell: (info) => info.getValue() || 0,
+      cell: (info) => {
+        const val = info.getValue() || 0;
+        return (
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${val > 0 ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'}`}>
+            {val} Unpaid
+          </span>
+        );
+      },
     }),
     columnHelper.display({
       id: "actions",
-      header: t("actions"),
+      header: () => <div className="text-right">{t("actions")}</div>,
       cell: (info) => (
-        <div className="flex gap-2">
-          <Button variant="ghost" size="icon" onClick={() => handleEdit(info.row.original)}>
-            <Edit className="w-4 h-4 text-blue-500" />
+        <div className="flex justify-end gap-2">
+          <Button variant="ghost" size="icon" className="hover:bg-primary/10 hover:text-primary transition-colors" onClick={() => handleEdit(info.row.original)}>
+            <Edit className="w-4 h-4" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => handleDelete(info.row.original.id)}>
-            <Trash2 className="w-4 h-4 text-red-500" />
+          <Button variant="ghost" size="icon" className="hover:bg-destructive/10 hover:text-destructive transition-colors" onClick={() => handleDelete(info.row.original.id)}>
+            <Trash2 className="w-4 h-4" />
           </Button>
         </div>
       ),
@@ -114,33 +136,38 @@ export function StudentsListPage() {
   });
 
   return (
-    <div className="p-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h1 className="text-2xl font-semibold">{t("sidebar_students", "Students")}</h1>
+    <div className="p-8 max-w-7xl mx-auto space-y-6">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-card p-6 rounded-2xl border border-border shadow-sm">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("sidebar_students", "Students Management")}</h1>
+          <p className="text-sm text-muted-foreground mt-1">View, search, and manage all your students</p>
+        </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+          <div className="relative w-full sm:w-80 group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <Input
-              placeholder={t("search_students", "Search students...")}
+              placeholder={t("search_students", "Search by name or phone...")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 w-full bg-white dark:bg-slate-900"
+              className="pl-10 h-10 w-full bg-background border-border focus-visible:ring-primary rounded-full shadow-sm"
             />
           </div>
-          <Button onClick={handleAdd} className="shrink-0">
+          <Button onClick={handleAdd} className="shrink-0 h-10 rounded-full px-5 shadow-sm font-medium">
             <Plus className="w-4 h-4 me-2" />
             {t("add_student")}
           </Button>
         </div>
       </div>
 
-      <div className="border rounded-md bg-white dark:bg-slate-900 overflow-hidden">
+      {/* Table Section */}
+      <div className="border border-border rounded-2xl bg-card shadow-sm overflow-hidden">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-muted/50">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="hover:bg-transparent border-border">
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} className="h-12 font-semibold text-muted-foreground">
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -154,20 +181,20 @@ export function StudentsListPage() {
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              Array.from({ length: 8 }).map((_, idx) => (
-                <TableRow key={idx}>
+              Array.from({ length: 5 }).map((_, idx) => (
+                <TableRow key={idx} className="border-border">
                   {Array.from({ length: columns.length }).map((_, cIdx) => (
-                    <TableCell key={cIdx} className="py-4">
-                      <div className={`h-4 bg-gray-100 dark:bg-gray-800 rounded animate-pulse ${cIdx === 0 ? 'w-36' : cIdx === 1 ? 'w-28' : 'w-20'}`} />
+                    <TableCell key={cIdx} className="py-5">
+                      <div className={`h-5 bg-muted rounded animate-pulse ${cIdx === 0 ? 'w-48' : cIdx === 1 ? 'w-24' : 'w-20'}`} />
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
+                <TableRow key={row.id} className="hover:bg-muted/30 transition-colors border-border group">
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className="py-3">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
@@ -175,28 +202,32 @@ export function StudentsListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-48 text-center">
-                  <div className="flex flex-col items-center justify-center text-gray-500">
-                    <svg className="w-12 h-12 mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-                    <p className="text-lg font-medium">{t("no_data_found")}</p>
-                    <p className="text-sm mt-1">{t("no_students_yet")}</p>
+                <TableCell colSpan={columns.length} className="h-64 text-center">
+                  <div className="flex flex-col items-center justify-center text-muted-foreground">
+                    <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                      <Search className="w-8 h-8 text-muted-foreground/50" />
+                    </div>
+                    <p className="text-lg font-semibold text-foreground">{t("no_data_found")}</p>
+                    <p className="text-sm mt-1">Try adjusting your search query.</p>
                   </div>
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
-        <PaginationControls
-          meta={meta}
-          onPageChange={(newPage) => setPage(newPage)}
-          onPerPageChange={(newPerPage) => {
-            setPerPage(newPerPage);
-            setPage(1);
-          }}
-          isLoading={isLoading}
-        />
+        
+        {/* Pagination Footer */}
+        <div className="border-t border-border bg-muted/20 px-4 py-3">
+          <PaginationControls
+            meta={meta}
+            onPageChange={(newPage) => setPage(newPage)}
+            onPerPageChange={(newPerPage) => {
+              setPerPage(newPerPage);
+              setPage(1);
+            }}
+            isLoading={isLoading}
+          />
+        </div>
       </div>
 
       {isEditDialogOpen && (
